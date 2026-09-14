@@ -882,6 +882,20 @@ input.caseInput::placeholder{ color:#69736d; }
   .memoryChoiceGrid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   .relationshipTitle{ font-size:1.05rem; }
 }
+/* ---------- Motion system: subtle evidence-room movement ---------- */
+.motionFlash{ position:fixed; inset:0; z-index:250; pointer-events:none; opacity:0; background:radial-gradient(circle at 50% 50%,rgba(215,184,102,.22),rgba(16,23,24,0) 62%); mix-blend-mode:screen; }
+.screenMotionTarget{ will-change:transform,opacity; }
+.archiveCluePill.linked,.archiveBookPill.linked{ animation:archiveSnap .36s cubic-bezier(.2,.9,.2,1) both; }
+.archiveSpineMessage span.recovered{ animation:spineReturn .55s cubic-bezier(.2,.9,.2,1) both; }
+.archiveSpineMessage.complete{ animation:libraryBreath 1.4s ease-in-out infinite; }
+.completionModal.show .completionModalCard{ animation:caseClosed .52s cubic-bezier(.18,.9,.22,1) both; }
+@keyframes archiveSnap{ 0%{transform:scale(1) rotate(0)} 45%{transform:scale(1.045) rotate(-.6deg)} 100%{transform:scale(1) rotate(0)} }
+@keyframes spineReturn{ 0%{opacity:0;transform:translateY(15px) rotate(7deg)} 65%{opacity:1;transform:translateY(-3px) rotate(-1deg)} 100%{opacity:1;transform:translateY(0) rotate(0)} }
+@keyframes libraryBreath{ 0%,100%{filter:drop-shadow(0 0 0 rgba(95,217,122,0))} 50%{filter:drop-shadow(0 0 12px rgba(95,217,122,.42))} }
+@keyframes caseClosed{ from{opacity:0;transform:scale(.93) translateY(22px) rotate(.8deg)} to{opacity:1;transform:scale(1) translateY(0) rotate(0)} }
+@media (prefers-reduced-motion:reduce){
+  .motionFlash,.archiveCluePill.linked,.archiveBookPill.linked,.archiveSpineMessage span.recovered,.archiveSpineMessage.complete,.completionModal.show .completionModalCard{ animation:none; }
+}
 </style>
 </head>
 <body>
@@ -1215,6 +1229,7 @@ input.caseInput::placeholder{ color:#69736d; }
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script>
 /* ============================================================
    PERSONALIZATION — edit later with real info/photos
@@ -1411,10 +1426,50 @@ function runDialogue(textEl, cueEl, lines, onComplete, speed=48){
   typeLine(lines[0]);
 }
 
+const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function motionFlash(color='gold'){
+  if(prefersReducedMotion) return;
+  const flash=document.createElement('div');
+  flash.className='motionFlash';
+  flash.style.background=color==='green'
+    ? 'radial-gradient(circle at 50% 50%,rgba(95,217,122,.20),rgba(16,23,24,0) 62%)'
+    : 'radial-gradient(circle at 50% 50%,rgba(215,184,102,.20),rgba(16,23,24,0) 62%)';
+  document.body.appendChild(flash);
+  if(window.gsap){
+    gsap.to(flash,{opacity:1,duration:.12,yoyo:true,repeat:1,ease:'power1.out',onComplete:()=>flash.remove()});
+  }else{
+    flash.remove();
+  }
+}
+
+function animateScreenEntrance(screen){
+  if(prefersReducedMotion || !window.gsap || !screen) return;
+  const targets=Array.from(screen.children).filter(el=>!el.classList.contains('hidden'));
+  gsap.killTweensOf(targets);
+  gsap.fromTo(targets,{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.42,stagger:.055,ease:'power2.out',clearProps:'opacity,visibility,transform'});
+}
+
+function animateLibraryMatch(clue, book, spine){
+  if(prefersReducedMotion || !window.gsap) return;
+  gsap.timeline()
+    .to([clue,book],{scale:1.035,duration:.12,ease:'power2.out'})
+    .to([clue,book],{scale:1,duration:.18,ease:'back.out(2)'})
+    .fromTo(spine,{autoAlpha:0,y:14,rotation:8},{autoAlpha:1,y:0,rotation:0,duration:.42,ease:'back.out(2)'},0);
+}
+
+function animateLibraryComplete(message){
+  if(prefersReducedMotion || !window.gsap) return;
+  motionFlash('green');
+  gsap.fromTo(message.children,{y:8,scale:.9},{y:0,scale:1,duration:.32,stagger:.055,ease:'back.out(2)'});
+}
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=> s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+  const screen=document.getElementById(id);
+  screen.classList.remove('hidden');
   window.scrollTo(0,0);
+  requestAnimationFrame(()=>animateScreenEntrance(screen));
 }
 
 /* ============================================================
@@ -2011,6 +2066,7 @@ function showCompletionModal(ch, resultNote, allFilesClosed){
   };
   modal.classList.add('show');
   document.body.classList.add('modalOpen');
+  if(!prefersReducedMotion) motionFlash('green');
   setTimeout(()=>returnBtn.focus(),0);
 }
 
@@ -2727,13 +2783,17 @@ function renderSymbolSequence(ch, area){
         book.classList.add('linked');
         selectedClue.classList.add('linked');
         selectedClue.classList.remove('selectedPill');
-        Array.from(message.children)[cases.indexOf(matched)].textContent=matched.letter;
+        const spine=Array.from(message.children)[cases.indexOf(matched)];
+        spine.textContent=matched.letter;
+        spine.classList.add('recovered');
+        animateLibraryMatch(selectedClue, book, spine);
         linked++;
         selectedClue=null;
         document.getElementById('chapterFeedback').textContent=`${matched.book} restored to the shelf. ${linked} of ${cases.length} books recovered.`;
         document.getElementById('chapterFeedback').className='feedbackLine good';
         if(linked===cases.length){
           message.classList.add('complete');
+          animateLibraryComplete(message);
           document.getElementById('chapterFeedback').textContent='STORIES! The Lost Library is restored, every shelf is full, and the books have stopped pretending they escaped on purpose.';
           document.getElementById('chapterFeedback').className='feedbackLine good';
           setTimeout(()=>finishChapterSuccess(ch),850);

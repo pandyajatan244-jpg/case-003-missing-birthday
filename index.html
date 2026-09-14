@@ -481,6 +481,19 @@ body.modalOpen{ overflow:hidden; }
 
 /* ---------- Lock + quote match (Archive) ---------- */
 .archiveStageLabel{ font-family:'Special Elite', monospace; font-size:.68rem; color:var(--dim); letter-spacing:1px; margin-bottom:10px; }
+.archiveLibraryNote{ max-width:590px; margin:0 auto 12px; color:var(--paper); font-size:.73rem; line-height:1.5; }
+.archiveSpineMessage{ display:flex; justify-content:center; gap:5px; margin:0 auto 14px; }
+.archiveSpineMessage span{ display:grid; place-items:center; width:28px; height:40px; border:1px solid var(--lineStrong); background:rgba(14,21,22,.9); color:var(--gold); font:700 .82rem/1 'Special Elite',monospace; }
+.archiveSpineMessage.complete span{ border-color:var(--green); color:var(--green); background:rgba(80,130,83,.14); }
+.archiveLibraryMatch{ align-items:flex-start; gap:12px; }
+.archiveClueColumn{ width:min(390px,100%); }
+.archiveBookColumn{ width:min(230px,100%); }
+.archiveCluePill,.archiveBookPill{ width:100%; min-width:0; border-radius:2px; text-align:left; font-family:'Courier Prime',monospace; }
+.archiveCluePill{ display:flex; align-items:flex-start; gap:8px; line-height:1.35; }
+.archiveClueEmoji{ flex:0 0 auto; font-size:1.05rem; }
+.archiveBookPill{ min-height:44px; color:var(--gold); font:700 .66rem/1.3 'Special Elite',monospace; letter-spacing:.6px; }
+.archiveCluePill.linked,.archiveBookPill.linked{ border-color:var(--green); background:rgba(80,130,83,.18); color:var(--green); cursor:default; }
+@media (max-width:600px){ .archiveLibraryMatch{ gap:10px; } .archiveClueColumn,.archiveBookColumn{ width:100%; } .archiveSpineMessage span{ width:25px; height:37px; } }
 
 /* number mystery */
 .numberBoard{ display:flex; gap:20px; justify-content:center; margin:24px 0; flex-wrap:wrap; }
@@ -1239,7 +1252,7 @@ const INVESTIGATION_PROFILES = {
 };
 const observerScanText = {
   cinema:'EVIDENCE SCAN: Every correct pair is made of one prop and one film title. The numbered stamp on a prop is a clue to its matching evidence, not part of the movie title.',
-  archive:'EVIDENCE SCAN: The lock is a four-symbol sequence. The brave house opens the investigation; the remaining houses follow the familiar house order.',
+  archive:'EVIDENCE SCAN: Each lost book has one distinct clue bundle. Start with the loudest evidence: a crow for Six of Crows, a lightning scar for Harry Potter, and a bow for The Hunger Games.',
   television:'EVIDENCE SCAN: The remote wants phrases, not show names. Read each channel prompt as a description of the line you must type.',
   anime:'EVIDENCE SCAN: The file has two puzzle layers — dialogue and deliberately bad plot summaries — followed by the final name checkpoint.',
   sound:'EVIDENCE SCAN: This is a one-to-one board. Each song title has exactly one artist, and every artist is used once.',
@@ -1249,7 +1262,7 @@ const observerScanText = {
 };
 const analystOverlayText = {
   cinema:'PATTERN OVERLAY: There are 14 prop–film pairs arranged across three reels. A successful pair disappears from the active search.',
-  archive:'PATTERN OVERLAY: Stage 1 is a four-symbol lock. Stage 2 is a six-line-to-book matching board. Finish both stages to close the file.',
+  archive:'PATTERN OVERLAY: There are eight one-to-one evidence matches. A correct book-and-clue pairing restores one letter to the library spine message.',
   television:'PATTERN OVERLAY: Eight channels must be cleared in order. One correct phrase unlocks exactly one next channel.',
   anime:'PATTERN OVERLAY: Complete the dialogue file and the terrible-summary file, then pass the name checkpoint. The jigsaw stage has been removed.',
   sound:'PATTERN OVERLAY: Six audio clips lead to six song-and-artist guesses. A correct identification unlocks exactly one next signal.',
@@ -1259,7 +1272,7 @@ const analystOverlayText = {
 };
 const chaoticInterventionText = {
   cinema:'CHAOTIC INTERVENTION: Start with the most unmistakable prop–film pair you can see. The katana belongs with Kill Bill; the evidence shelf is feeling dramatic.',
-  archive:'CHAOTIC INTERVENTION: Press Lion first. The lock is not asking for a secret spell; it wants the house order everyone remembers.',
+  archive:'CHAOTIC INTERVENTION: Start with the crow, the lightning scar, or the bow. Six of Crows, Harry Potter, and The Hunger Games are practically shouting their identities.',
   television:'CHAOTIC INTERVENTION: The next answer is an iconic phrase, not a programme title. If the prompt describes a chemistry teacher answering his wife, think: “I am the one who knocks.”',
   anime:'CHAOTIC INTERVENTION: Do not skip the emotional clues. The anime file is a two-game relay, and the final checkpoint asks for the detective name you entered.',
   sound:'CHAOTIC INTERVENTION: Start with the most unmistakable signal. Thunderstruck belongs to AC/DC; the rest of the playlist is waiting for your ears.',
@@ -1510,22 +1523,22 @@ const chapters = [
     completion:"Sometimes the truth hides in the details nobody bothers to count. Case File: closed. Bill: still dead."
   },
   {
-    id:'archive', num:'02', icon:'📚', label:'THE BOOKS HAVE LOCKED THEMSELVES IN', gameType:'Lock + Quote Match',
-    eyebrow:'THE BOOKS HAVE LOCKED THEMSELVES IN — THE LOCKED SHELF',
-    title:'Crack the lock, then match the quotes',
-    flavor:'Stage one: press the house symbols in the right order. Stage two: match famous lines to the books they escaped from — and no, "Alohomora" will not work on either.',
+    id:'archive', num:'02', icon:'📚', label:'THE BOOKS HAVE LOCKED THEMSELVES IN', gameType:'Lost Library Evidence Match',
+    eyebrow:'THE BOOKS HAVE LOCKED THEMSELVES IN — THE LOST LIBRARY',
+    title:'Return every lost book to its evidence',
+    flavor:'Eight books escaped their shelves and left their clue bundles behind. Match each title to its evidence before the library starts shelving the chaos by colour.',
     hints:[
-      "Think of the house that gets sorted first in most retellings. Also: Dobby would just open the shelf for you.",
-      "The bravest house usually opens the story — and the lock. Gryffindor, then the rest fall in line.",
-      "Correct order: Lion (Gryffindor) → Snake (Slytherin) → Eagle (Ravenclaw) → Badger (Hufflepuff). Then match the book clues across Harry Potter, Six of Crows, Kim Jiyoung, Born 1982, The Hunger Games, and Taylor Jenkins Reid."
+      "Start with the unmistakable evidence: crow and heist for Six of Crows, lightning scar and castle for Harry Potter, and bow and rebellion for The Hunger Games.",
+      "The contemporary books carry quieter clues: disappearing at school, a family holding grief in silence, friendship and art, or a remote mountain survival story.",
+      "Full shelf: Once Upon a Broken Heart — bargain, apple, and broken heart; My Friends — art and friendship; If You Could See the Sun — disappearing student; Everything I Never Told You — family silence and grief; Near the Bone — snowbound mountain danger; Six of Crows — crow and impossible heist; Harry Potter series — lightning scar and wizarding school; Hunger Games series — bow, arena, and rebellion."
     ],
     banter:[
-      "A hint? Hermione solved harder riddles in a burning potions room while ON FIRE, emotionally.",
-      "Two hints deep and you still haven't said the magic word. It's not 'help,' by the way.",
-      "Fine, here's the whole spellbook. Dobby is disappointed but not surprised."
+      "A hint? The books escaped one shelf and you immediately requested library assistance. Bold.",
+      "Two hints. The crow has filed a complaint. It says the heist was easier than this.",
+      "Full shelf catalogue recovered. Even the lost books are now quietly judging your filing system."
     ],
-    evidence:'EVIDENCE 05 — a worn paperback with a folded corner on the same page, every time. It\'s the Chamber of Secrets, obviously. "It does not do to dwell on dreams."',
-    completion:"Some stories stay with us long after the last page. The shelf creaks open like Hogwarts letting you in late."
+    evidence:'EVIDENCE 05 — eight book-spine fragments, a crow feather, a lightning-marked bookmark, a red apple, and a note reading: STORIES ALWAYS FIND THEIR WAY BACK.',
+    completion:'The Lost Library is restored. Eight stories returned to their shelves, and the evidence board receives another recovered fragment.'
   },
   {
     id:'television', num:'03', icon:'📺', label:'THE REMOTE KNOWS TOO MUCH', gameType:'Channel Surf Code Breaker',
@@ -2639,121 +2652,102 @@ function renderMemoryMatch(ch, area){
   renderRound();
 }
 
-/* ---------- MINIGAME 2: Symbol Sequence (Archive) ---------- */
-/* ---------- MINIGAME 2: Lock + Quote Match (Archive) ---------- */
+/* ---------- MINIGAME 2: Lost Library Evidence Match (Archive) ---------- */
 function renderSymbolSequence(ch, area){
-  const stageLabel = document.createElement('div');
-  stageLabel.className='archiveStageLabel';
-  stageLabel.textContent = 'STAGE 1 OF 2 — THE HOUSE LOCK';
-  area.appendChild(stageLabel);
-
-  const symbols = [
-    {icon:'🦁', key:'lion'}, {icon:'🐍', key:'snake'}, {icon:'🦅', key:'eagle'}, {icon:'🦡', key:'badger'}
+  const cases = [
+    {book:'ONCE UPON A BROKEN HEART', icon:'🍎💔🔑', clue:'A bargain, a prince, a red apple, and a heart that should not have been trusted.', letter:'S'},
+    {book:'MY FRIENDS', icon:'🎨🫂🌧️', clue:'Friendship, art, loneliness, and the people who remain when everything feels too quiet.', letter:'T'},
+    {book:'IF YOU COULD SEE THE SUN', icon:'👻🏫💸', clue:'A student begins disappearing and finds a dangerous way to turn that strange ability into money.', letter:'O'},
+    {book:'EVERYTHING I NEVER TOLD YOU', icon:'🌊👨‍👩‍👧‍👦🕯️', clue:'A family carries grief, pressure, silence, and all the things nobody says aloud.', letter:'R'},
+    {book:'NEAR THE BONE', icon:'❄️🏔️🩸', clue:'A remote mountain, a dangerous marriage, and something else waiting in the snow.', letter:'I'},
+    {book:'SIX OF CROWS', icon:'🐦‍⬛💰🔒', clue:'A crew, an impossible heist, and a plan held together by nerve and bad coping mechanisms.', letter:'E'},
+    {book:'HARRY POTTER SERIES', icon:'⚡🏰🪄', clue:'A lightning scar, a wizarding school, friendship, and a war against a dark wizard.', letter:'S'},
+    {book:'THE HUNGER GAMES SERIES', icon:'🏹🔥🎯', clue:'A tribute, an arena, a rebellion, and a girl who refuses to become entertainment.', letter:'!'}
   ];
-  const correctOrder = ['lion','snake','eagle','badger'];
-  let shuffled = symbols.slice().sort(()=>Math.random()-0.5);
-  let progress = [];
 
-  const dispWrap = document.createElement('div');
-  dispWrap.className='sequenceDisplay';
-  for(let i=0;i<4;i++){ const s=document.createElement('span'); dispWrap.appendChild(s); }
-  area.appendChild(dispWrap);
-
-  const row = document.createElement('div');
-  row.className='symbolRow';
-  shuffled.forEach(sym=>{
-    const btn = document.createElement('div');
-    btn.className='symbolBtn';
-    btn.textContent = sym.icon;
-    btn.addEventListener('click', ()=>{
-      if(btn.classList.contains('pressed')) return;
-      progress.push(sym.key);
-      btn.classList.add('pressed');
-      const dots = dispWrap.querySelectorAll('span');
-      dots[progress.length-1].classList.add('filled');
-
-      const expectedSoFar = correctOrder.slice(0, progress.length);
-      const matchesSoFar = JSON.stringify(progress) === JSON.stringify(expectedSoFar);
-
-      if(!matchesSoFar){
-        if(consumeMistakeShield(ch)){
-          progress.pop(); btn.classList.remove('pressed'); dots[progress.length].classList.remove('filled');
-          return;
-        }
-        document.getElementById('chapterFeedback').textContent = 'Wrong order — the lock resets. Even Neville got the password wrong sometimes.';
-        document.getElementById('chapterFeedback').className='feedbackLine bad';
-        setTimeout(()=>{
-          progress = [];
-          row.querySelectorAll('.symbolBtn').forEach(b=> b.classList.remove('pressed'));
-          dots.forEach(d=> d.classList.remove('filled'));
-          document.getElementById('chapterFeedback').textContent='';
-        }, 700);
-        return;
-      }
-      if(progress.length===4){
-        document.getElementById('chapterFeedback').textContent = 'The lock clicks open. Stage 2 unlocked: match the quotes.';
-        document.getElementById('chapterFeedback').className='feedbackLine good';
-        row.querySelectorAll('.symbolBtn').forEach(b=> b.style.pointerEvents='none');
-        setTimeout(()=> renderQuoteMatchStage(ch, area), 900);
-      }
-    });
-    row.appendChild(btn);
-  });
-  area.appendChild(row);
-}
-
-function renderQuoteMatchStage(ch, area){
-  area.innerHTML='';
   const stageLabel = document.createElement('div');
   stageLabel.className='archiveStageLabel';
-  stageLabel.textContent = 'STAGE 2 OF 2 — MATCH THE LINE TO THE BOOK';
+  stageLabel.textContent='THE LOST LIBRARY — MATCH EACH BOOK TO ITS EVIDENCE';
   area.appendChild(stageLabel);
 
-  const quotes = ["Wizarding-school wisdom about not living inside dreams","A heist crew with a ruthless planner, a locksmith, a sharpshooter, and a very bad night","A quiet literary clue about the life of an ordinary Korean woman across decades","A rebellion arena, a mockingjay, and a district that refuses to stay quiet","A glamorous author, a hidden life, and seven husbands worth investigating","A magical boarding-school line about loyalty, memory, and always choosing your people"];
-  const books = ["HARRY POTTER","SIX OF CROWS","KIM JIYOUNG, BORN 1982","THE HUNGER GAMES","TAYLOR JENKINS REID","HARRY POTTER — THE DEEP CUT"];
+  const note = document.createElement('div');
+  note.className='archiveLibraryNote';
+  note.textContent='Select an evidence bundle, then select the book it belongs to. Every restored book returns one letter to the library message.';
+  area.appendChild(note);
+
+  const message = document.createElement('div');
+  message.className='archiveSpineMessage';
+  cases.forEach(()=>{
+    const spine = document.createElement('span');
+    spine.textContent='?';
+    message.appendChild(spine);
+  });
+  area.appendChild(message);
 
   const wrap = document.createElement('div');
-  wrap.className='matchColumns';
-  const col1 = document.createElement('div'); col1.className='matchCol';
-  const col2 = document.createElement('div'); col2.className='matchCol';
-  let selected = null; let linked = 0;
+  wrap.className='matchColumns archiveLibraryMatch';
+  const clueCol = document.createElement('div');
+  clueCol.className='matchCol archiveClueColumn';
+  const bookCol = document.createElement('div');
+  bookCol.className='matchCol archiveBookColumn';
+  wrap.appendChild(clueCol);
+  wrap.appendChild(bookCol);
+  area.appendChild(wrap);
 
-  const shuffledBooks = books.slice().sort(()=>Math.random()-0.5);
+  let selectedClue = null;
+  let linked = 0;
 
-  quotes.forEach((q,i)=>{
-    const pill = document.createElement('div');
-    pill.className='matchPill'; pill.textContent = q; pill.dataset.key = i;
-    pill.addEventListener('click', ()=>{
-      if(pill.classList.contains('linked')) return;
-      col1.querySelectorAll('.matchPill').forEach(p=>p.classList.remove('selectedPill'));
-      pill.classList.add('selectedPill'); selected = pill;
+  cases.slice().sort(()=>Math.random()-.5).forEach((item,index)=>{
+    const clue = document.createElement('button');
+    clue.type='button';
+    clue.className='matchPill archiveCluePill';
+    clue.dataset.book=item.book;
+    clue.innerHTML=`<span class="archiveClueEmoji">${item.icon}</span><span>${item.clue}</span>`;
+    clue.addEventListener('click',()=>{
+      if(clue.classList.contains('linked')) return;
+      clueCol.querySelectorAll('.archiveCluePill').forEach(card=>card.classList.remove('selectedPill'));
+      clue.classList.add('selectedPill');
+      selectedClue=clue;
+      document.getElementById('chapterFeedback').textContent='Evidence bundle selected. Find its missing book.';
+      document.getElementById('chapterFeedback').className='feedbackLine';
     });
-    col1.appendChild(pill);
+    clueCol.appendChild(clue);
   });
-  shuffledBooks.forEach(b=>{
-    const pill = document.createElement('div');
-    pill.className='matchPill'; pill.textContent = b; pill.dataset.book = b;
-    pill.addEventListener('click', ()=>{
-      if(pill.classList.contains('linked') || !selected) return;
-      const correctBook = books[selected.dataset.key];
-      if(pill.dataset.book === correctBook){
-        pill.classList.add('linked'); selected.classList.add('linked'); selected.classList.remove('selectedPill');
-        selected = null; linked++;
-        document.getElementById('chapterFeedback').textContent = 'Correct pairing logged.';
+
+  cases.slice().sort(()=>Math.random()-.5).forEach(item=>{
+    const book = document.createElement('button');
+    book.type='button';
+    book.className='matchPill archiveBookPill';
+    book.dataset.book=item.book;
+    book.textContent=item.book;
+    book.addEventListener('click',()=>{
+      if(book.classList.contains('linked') || !selectedClue) return;
+      if(book.dataset.book===selectedClue.dataset.book){
+        const matched=cases.find(entry=>entry.book===book.dataset.book);
+        book.classList.add('linked');
+        selectedClue.classList.add('linked');
+        selectedClue.classList.remove('selectedPill');
+        Array.from(message.children)[cases.indexOf(matched)].textContent=matched.letter;
+        linked++;
+        selectedClue=null;
+        document.getElementById('chapterFeedback').textContent=`${matched.book} restored to the shelf. ${linked} of ${cases.length} books recovered.`;
         document.getElementById('chapterFeedback').className='feedbackLine good';
-        if(linked===quotes.length){
-          document.getElementById('chapterFeedback').textContent = 'All quotes matched. The shelf approves.';
-          finishChapterSuccess(ch);
+        if(linked===cases.length){
+          message.classList.add('complete');
+          document.getElementById('chapterFeedback').textContent='STORIES! The Lost Library is restored, every shelf is full, and the books have stopped pretending they escaped on purpose.';
+          document.getElementById('chapterFeedback').className='feedbackLine good';
+          setTimeout(()=>finishChapterSuccess(ch),850);
         }
       }else{
-        document.getElementById('chapterFeedback').textContent = 'Not quite — even the Restricted Section has better organization than that.';
+        if(consumeMistakeShield(ch)) return;
+        book.classList.add('wrongPick');
+        document.getElementById('chapterFeedback').textContent='Wrong shelf. That book has a different kind of emotional damage attached to it.';
         document.getElementById('chapterFeedback').className='feedbackLine bad';
+        setTimeout(()=>book.classList.remove('wrongPick'),380);
       }
     });
-    col2.appendChild(pill);
+    bookCol.appendChild(book);
   });
-  wrap.appendChild(col1); wrap.appendChild(col2);
-  area.appendChild(wrap);
 }
 function renderCodeBreaker(ch, area){
   const channels = [

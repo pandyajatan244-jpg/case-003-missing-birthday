@@ -3452,9 +3452,16 @@ function renderMoodMatching(ch, area){
   artistInput.addEventListener('input',updateSubmitState);
   songInput.addEventListener('keydown',event=>{ if(event.key==='Enter' && !submitButton.disabled) submitButton.click(); });
   artistInput.addEventListener('keydown',event=>{ if(event.key==='Enter' && !submitButton.disabled) submitButton.click(); });
+  function enableAnswerInputs(){
+    songInput.disabled=false;
+    artistInput.disabled=false;
+    songInput.removeAttribute('disabled');
+    artistInput.removeAttribute('disabled');
+  }
   function loadRound(){
     if(currentIndex>=clips.length) return;
     roundLocked=false;
+    enableAnswerInputs();
     selectedSong='';
     selectedArtist='';
     stopAudio();
@@ -3467,8 +3474,7 @@ function renderMoodMatching(ch, area){
     });
     songInput.value='';
     artistInput.value='';
-    songInput.disabled=false;
-    artistInput.disabled=false;
+    enableAnswerInputs();
     selectedSong='';
     selectedArtist='';
     submitButton.disabled=true;
@@ -3521,7 +3527,12 @@ function renderMoodMatching(ch, area){
         feedback.textContent='All six audio clips identified. The Sound Room is clear.';
         setTimeout(()=>finishChapterSuccess(ch),900);
       }else{
-        setTimeout(()=>{ currentIndex++; loadRound(); },900);
+        setTimeout(()=>{
+          currentIndex++;
+          loadRound();
+          enableAnswerInputs();
+          songInput.focus();
+        },900);
       }
     }else{
       if(consumeMistakeShield(ch)) return;

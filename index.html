@@ -3258,7 +3258,7 @@ function renderMoodMatching(ch, area){
 
   const instructions=document.createElement('div');
   instructions.className='audioGuessInstructions';
-  instructions.textContent='Tap play, listen to the short clip, then select both the song and the artist. The next signal unlocks only after a correct guess.';
+  instructions.textContent='Tap play, listen to the short clip, then type the song title and artist name. The next signal unlocks only after a correct guess.';
   panel.appendChild(instructions);
 
   const answerGrid=document.createElement('div');
@@ -3267,24 +3267,32 @@ function renderMoodMatching(ch, area){
 
   const songGroup=document.createElement('div');
   songGroup.className='audioAnswerGroup';
-  const songLabel=document.createElement('div');
+  const songLabel=document.createElement('label');
   songLabel.className='audioAnswerLabel';
   songLabel.textContent='SONG TITLE';
   songGroup.appendChild(songLabel);
-  const songList=document.createElement('div');
-  songList.className='audioChoiceList';
-  songGroup.appendChild(songList);
+  const songInput=document.createElement('input');
+  songInput.type='text';
+  songInput.className='audioTextInput';
+  songInput.placeholder='Type the song title';
+  songInput.autocomplete='off';
+  songInput.setAttribute('aria-label','Song title');
+  songGroup.appendChild(songInput);
   answerGrid.appendChild(songGroup);
 
   const artistGroup=document.createElement('div');
   artistGroup.className='audioAnswerGroup';
-  const artistLabel=document.createElement('div');
+  const artistLabel=document.createElement('label');
   artistLabel.className='audioAnswerLabel';
   artistLabel.textContent='ARTIST';
   artistGroup.appendChild(artistLabel);
-  const artistList=document.createElement('div');
-  artistList.className='audioChoiceList';
-  artistGroup.appendChild(artistList);
+  const artistInput=document.createElement('input');
+  artistInput.type='text';
+  artistInput.className='audioTextInput';
+  artistInput.placeholder='Type the artist name';
+  artistInput.autocomplete='off';
+  artistInput.setAttribute('aria-label','Artist name');
+  artistGroup.appendChild(artistInput);
   answerGrid.appendChild(artistGroup);
 
   const submitButton=document.createElement('button');
@@ -3306,23 +3314,18 @@ function renderMoodMatching(ch, area){
     playButton.textContent='↻ PLAY CLIP';
     if(message) status.textContent=message;
   }
-  function selectAnswer(kind,value,button){
-    if(roundLocked) return;
-    const list=kind==='song' ? songList : artistList;
-    list.querySelectorAll('.audioChoice').forEach(item=>item.classList.remove('selected'));
-    button.classList.add('selected');
-    if(kind==='song') selectedSong=value;
-    else selectedArtist=value;
-    submitButton.disabled=!(selectedSong && selectedArtist);
+  function normalizeGuess(value){
+    return value.trim().toUpperCase().replace(/&/g,' AND ').replace(/[^A-Z0-9]+/g,' ').replace(/\s+/g,' ').trim();
   }
-  function createChoice(list,kind,value){
-    const button=document.createElement('button');
-    button.type='button';
-    button.className='audioChoice';
-    button.textContent=value;
-    button.addEventListener('click',()=>selectAnswer(kind,value,button));
-    list.appendChild(button);
+  function updateSubmitState(){
+    selectedSong=songInput.value;
+    selectedArtist=artistInput.value;
+    submitButton.disabled=!(selectedSong.trim() && selectedArtist.trim());
   }
+  songInput.addEventListener('input',updateSubmitState);
+  artistInput.addEventListener('input',updateSubmitState);
+  songInput.addEventListener('keydown',event=>{ if(event.key==='Enter' && !submitButton.disabled) submitButton.click(); });
+  artistInput.addEventListener('keydown',event=>{ if(event.key==='Enter' && !submitButton.disabled) submitButton.click(); });
   function loadRound(){
     if(currentIndex>=clips.length) return;
     roundLocked=false;
@@ -3340,11 +3343,13 @@ function renderMoodMatching(ch, area){
     progressDots.forEach((dot,i)=>{
       dot.className='audioProgressDot'+(i<currentIndex?' done':i===currentIndex?' active':'');
     });
-    songList.innerHTML='';
-    artistList.innerHTML='';
-    shuffle(clips.map(item=>item.song)).forEach(song=>createChoice(songList,'song',song));
-    shuffle(clips.map(item=>item.artist)).forEach(artist=>createChoice(artistList,'artist',artist));
+    songInput.value='';
+    artistInput.value='';
+    selectedSong='';
+    selectedArtist='';
     submitButton.disabled=true;
+    songInput.classList.remove('wrong');
+    artistInput.classList.remove('wrong');
     submitButton.textContent='SUBMIT GUESS';
     playButton.disabled=false;
     playButton.textContent='▶ PLAY CLIP';
@@ -3380,13 +3385,13 @@ function renderMoodMatching(ch, area){
   submitButton.addEventListener('click',()=>{
     if(roundLocked || !selectedSong || !selectedArtist) return;
     const clip=clips[currentIndex];
-    const songCorrect=selectedSong===clip.song;
-    const artistCorrect=selectedArtist===clip.artist;
+    const songCorrect=normalizeGuess(selectedSong)===normalizeGuess(clip.song);
+    const artistCorrect=normalizeGuess(selectedArtist)===normalizeGuess(clip.artist);
     if(songCorrect && artistCorrect){
       roundLocked=true;
       stopAudio();
-      songList.querySelectorAll('.audioChoice').forEach(button=>{ button.disabled=true; if(button.textContent===clip.song) button.classList.add('correct'); });
-      artistList.querySelectorAll('.audioChoice').forEach(button=>{ button.disabled=true; if(button.textContent===clip.artist) button.classList.add('correct'); });
+      songInput.disabled=true;
+      artistInput.disabled=true;
       submitButton.disabled=true;
       feedback.textContent=`Correct — ${clip.song} by ${clip.artist}. The next signal is loading.`;
       feedback.className='feedbackLine good';
@@ -3398,11 +3403,17 @@ function renderMoodMatching(ch, area){
       }
     }else{
       if(consumeMistakeShield(ch)) return;
-      feedback.textContent='Not quite. Recheck both selections — the signal is still waiting.';
+      feedback.textContent='Not quite. Recheck the song title and artist name, then try again.';
       feedback.className='feedbackLine bad';
       submitButton.disabled=true;
-      answerGrid.querySelectorAll('.audioChoice.selected').forEach(button=>button.classList.add('wrong'));
-      setTimeout(()=>answerGrid.querySelectorAll('.audioChoice').forEach(button=>button.classList.remove('selected','wrong')),650);
+      songInput.classList.add('wrong');
+      artistInput.classList.add('wrong');
+      setTimeout(()=>{
+        songInput.classList.remove('wrong');
+        artistInput.classList.remove('wrong');
+      },650);
+      songInput.value='';
+      artistInput.value='';
       selectedSong='';
       selectedArtist='';
     }

@@ -1385,7 +1385,7 @@ const observerScanText = {
   cinema:'EVIDENCE SCAN: Every correct pair is made of one prop and one film title. The numbered stamp on a prop is a clue to its matching evidence, not part of the movie title.',
   archive:'EVIDENCE SCAN: Each lost book has one distinct clue bundle. Start with the loudest evidence: a crow for Six of Crows, a lightning scar for Harry Potter, and a bow for The Hunger Games.',
   television:'EVIDENCE SCAN: The remote wants phrases, not show names. Read each channel prompt as a description of the line you must type.',
-  anime:'EVIDENCE SCAN: The file has two puzzle layers — dialogue and deliberately bad plot summaries — followed by the final name checkpoint.',
+  anime:'EVIDENCE SCAN: The file has two puzzle layers — dialogue and deliberately bad plot summaries — followed by a clean case closure.',
   sound:'EVIDENCE SCAN: This is a one-to-one board. Each song title has exactly one artist, and every artist is used once.',
   wildlife:'EVIDENCE SCAN: The wildlife file is a three-stage trail: match witnesses, repeat Pikachu’s signal, then identify the sleeping witness and clear the capybara.',
   travel:'EVIDENCE SCAN: Rebuild Chikkamagaluru first: waterfall, monkey corn theft, Z Point, photos, lake, water sports, shopping, then home. Mysore follows with Palace, Zoo, Chamundi Hills, breakfast, Vrindavan Garden, and KRS Temple.',
@@ -1395,7 +1395,7 @@ const analystOverlayText = {
   cinema:'PATTERN OVERLAY: There are 14 prop–film pairs arranged across three reels. A successful pair disappears from the active search.',
   archive:'PATTERN OVERLAY: There are eight one-to-one evidence matches. A correct book-and-clue pairing restores one letter to the library spine message.',
   television:'PATTERN OVERLAY: Eight channels must be cleared in order. One correct phrase unlocks exactly one next channel.',
-  anime:'PATTERN OVERLAY: Complete the dialogue file and the terrible-summary file, then pass the name checkpoint. The jigsaw stage has been removed.',
+  anime:'PATTERN OVERLAY: Complete the dialogue file and the terrible-summary file. The jigsaw stage has been removed.',
   sound:'PATTERN OVERLAY: Six audio clips lead to six song-and-artist guesses. A correct identification unlocks exactly one next signal.',
   wildlife:'PATTERN OVERLAY: The witness map has nine matches, the Pikachu signal has four beats, and the final stage requires Jigglypuff before the capybara.',
   travel:'PATTERN OVERLAY: The timeline has fourteen stops: eight in Chikkamagaluru, followed by six in Mysore. Complete one city before the other.',
@@ -1732,22 +1732,22 @@ const chapters = [
     completion:'TV FILE COMPLETE. Eight channels cleared, one very suspicious remote confiscated, and the evidence board gains its third digit fragment.'
   },
   {
-    id:'anime', num:'04', icon:'⛩️', label:'THE ANIME TIMELINE IS CRYING', gameType:'Anime Dialogue + Name Checkpoint',
+    id:'anime', num:'04', icon:'⛩️', label:'THE ANIME TIMELINE IS CRYING', gameType:'Anime Dialogue + Plot Check',
     eyebrow:'THE ANIME TIMELINE IS CRYING — THE MEMORY FRAGMENT LAB',
-    title:'Solve two anime files, then confirm your identity',
-    flavor:'Match the anime dialogue, identify the terrible plot summaries, and finish with the name checkpoint. The jigsaw detour has been confiscated.',
+    title:'Solve two anime files',
+    flavor:'Match the anime dialogue and identify the terrible plot summaries. The jigsaw detour has been confiscated.',
     hints:[
       "The first file includes Jujutsu Kaisen, Steins;Gate, Your Name, Attack on Titan, Spirited Away, and Death Note.",
       "The second file contains deliberately bad plot summaries. Focus on the signature object, setting, or emotional clue before typing the anime title.",
-      "After both files, the final checkpoint asks for the detective name you entered at the start."
+      "Complete both files to close the anime evidence case."
     ],
     banter:[
       "A hint already? Gojo would call that a tactical retreat. I call it asking for help before the first dialogue card is even upside down.",
       "Second hint. Tanjiro would breathe through this, while Light would write down the puzzle's name and pretend that counts as solving it.",
-      "The jigsaw has been removed from the evidence locker. Two games, one name checkpoint, and absolutely no excuse for forgetting your own name."
+      "The jigsaw has been removed from the evidence locker. Two games, one completed anime file, and absolutely no excuse for confusing a protagonist with a plot summary."
     ],
-    evidence:'EVIDENCE 09 — six anime dialogue files, terrible summaries, one faded name tag, and a red thread connecting every world.',
-    completion:'The anime files are solved. "Don\'t forget who you are." The terminal accepts your answer, and the evidence board gains its very dramatic fragments.',
+    evidence:'EVIDENCE 09 — six anime dialogue files, terrible summaries, and a red thread connecting every world.',
+    completion:'The anime files are solved. The evidence board gains its very dramatic fragments.',
     dynamicEvidence:true
   },
   {
@@ -1829,7 +1829,7 @@ const passcodeClues = {
   cinema:{tag:'DIGIT POSITION 01 / THE POPCORN CRIME SCENE', body:'Two people sit at the heart of the sealed file. This is the first digit fragment.', primary:true, position:1, digit:'2'},
   archive:{tag:'DIGIT POSITION 02 / THE BOOKS HAVE LOCKED THEMSELVES IN', body:'The old lock opened with four house symbols. This is the second digit fragment.', primary:true, position:2, digit:'4'},
   television:{tag:'DIGIT POSITION 03 / THE REMOTE KNOWS TOO MUCH', body:'The capybara has an impeccably clean record: zero guilty capybaras. This is the third digit fragment.', primary:true, position:3, digit:'0'},
-  anime:{tag:'DIGIT POSITION 04 / THE ANIME TIMELINE IS CRYING', body:'Nine? The anime archive has nine red-string knots around the name checkpoint. Keep that fourth digit fragment.', primary:true, position:4, digit:'9'},
+  anime:{tag:'DIGIT POSITION 04 / THE ANIME TIMELINE IS CRYING', body:'Nine? The anime archive has nine red-string knots around its fourth file. Keep that fourth digit fragment.', primary:true, position:4, digit:'9'},
   sound:{tag:'DIGIT POSITION 05 / THE PLAYLIST HAS A WITNESS', body:'The broadcast begins with one red light before the music starts. This is the fifth digit fragment.', primary:true, position:5, digit:'1'},
   wildlife:{tag:'DIGIT POSITION 06 / THE CAPYBARA IS A PERSON OF INTEREST', body:'Nine creature witnesses joined the investigation. This is the sixth digit fragment.', primary:true, position:6, digit:'9'},
   travel:{tag:'DIGIT POSITION 07 / TWO TRIPS, ONE SUSPICIOUS ITINERARY', body:'The travel passport has nine red-string knots tying the two journeys together. This is the seventh digit fragment.', primary:true, position:7, digit:'9'},
@@ -3055,7 +3055,6 @@ function renderAnimeEmojiAnswers(ch, area){
   const rounds=[
     {plot:'A young witch moves out, starts a delivery business, and discovers that flying is easier than figuring out rent, confidence, and a talking cat.', answers:["KIKI'S DELIVERY SERVICE",'KIKIS DELIVERY SERVICE']},
     {plot:'A man goes on holiday expecting sun, swimming, and relaxation, but the beach trip becomes an aggressively chaotic drinking competition with a diving club.', answers:['GRAND BLUE','GRAND BLUE DREAMING']},
-    {plot:'A small child with impossible hair trains, eats constantly, and turns every family reunion into a martial-arts tournament with increasingly alarming stakes.', answers:['DRAGON BALL']},
     {plot:'A wolf-raised young woman joins a forest argument between industry, gods, and a giant boar who is having the worst day imaginable.', answers:['PRINCESS MONONOKE','MONONOKE HIME']},
     {plot:'A wizard lives in a moving house, changes his appearance whenever emotionally inconvenienced, and lets a fire demon handle the household administration.', answers:["HOWL'S MOVING CASTLE",'HOWLS MOVING CASTLE']},
     {plot:'A boy who was unkind at school grows up, learns that consequences are real, and tries to reconnect with the girl he hurt while everyone struggles with communication.', answers:['A SILENT VOICE','THE SILENT VOICE','KOE NO KATACHI']}
@@ -3068,20 +3067,10 @@ function renderAnimeEmojiAnswers(ch, area){
   function showRound(){ const item=rounds[index]; panel.innerHTML=`<div class="dialogueText">${item.plot}</div><div style="font-size:.68rem;color:var(--dim);margin-top:8px;">BAD PLOT FILE ${index+1} OF ${rounds.length}</div>`; input.value=''; input.focus(); }
   function check(){
     const item=rounds[index]; const answer=normalize(input.value); const ok=item.answers.some(x=>normalize(x)===answer);
-    if(ok){ document.getElementById('chapterFeedback').textContent='Plot identified. The summary was terrible, but the detective work was excellent.'; document.getElementById('chapterFeedback').className='feedbackLine good'; input.value=''; index++; if(index===rounds.length){ input.disabled=true; button.disabled=true; setTimeout(()=>renderAnimeNameStage(ch,area),650); } else showRound(); }
+    if(ok){ document.getElementById('chapterFeedback').textContent='Plot identified. The summary was terrible, but the detective work was excellent.'; document.getElementById('chapterFeedback').className='feedbackLine good'; input.value=''; index++; if(index===rounds.length){ input.disabled=true; button.disabled=true; setTimeout(()=>finishChapterSuccess(ch),650); } else showRound(); }
     else { if(consumeMistakeShield(ch)) return; document.getElementById('chapterFeedback').textContent='Not quite. The plot has been explained badly, but the clues are still there. Try the anime title again.'; document.getElementById('chapterFeedback').className='feedbackLine bad'; }
   }
   button.addEventListener('click',check); input.addEventListener('keydown',e=>{if(e.key==='Enter')check();}); showRound();
-}
-
-function renderAnimeNameStage(ch,area){
-  area.innerHTML=''; const label=document.createElement('div'); label.className='animeStageLabel'; label.textContent='FINAL CHECKPOINT — THE NAME CHECKPOINT'; area.appendChild(label);
-  const wrap=document.createElement('div'); wrap.className='codeTerminal'; wrap.innerHTML=`<div>TERMINAL: "State your name, Detective. Don't forget it — Chihiro almost did."</div>`; area.appendChild(wrap);
-  const input=document.createElement('input'); input.type='text'; input.className='caseInput'; input.placeholder='Type your name...';
-  const button=document.createElement('button'); button.className='caseBtn small'; button.textContent='CONFIRM'; button.style.marginLeft='10px';
-  const row=document.createElement('div'); row.style.marginTop='14px'; row.appendChild(input); row.appendChild(button); area.appendChild(row);
-  function confirm(){ const value=input.value.trim().toLowerCase(); if(value===gameState.playerName.trim().toLowerCase()&&value.length){ document.getElementById('chapterFeedback').textContent='IDENTITY CONFIRMED. The anime worlds remember you. Haku, Tanjiro, and L would all accept this evidence.'; document.getElementById('chapterFeedback').className='feedbackLine good'; input.disabled=true; button.disabled=true; finishChapterSuccess(ch); } else { document.getElementById('chapterFeedback').textContent='That name does not match the detective on file. No aliases, no fake IDs, no Spirit World loopholes.'; document.getElementById('chapterFeedback').className='feedbackLine bad'; } }
-  button.addEventListener('click',confirm); input.addEventListener('keydown',e=>{if(e.key==='Enter')confirm();});
 }
 
 function renderAnimeQuoteStage(ch, area){
@@ -3118,7 +3107,7 @@ function renderAnimeQuoteStage(ch, area){
         document.getElementById('chapterFeedback').className='feedbackLine good';
         if(linked === quotes.length){
           document.getElementById('chapterFeedback').textContent = 'All six moments matched. Onto stage 2.';
-          setTimeout(()=> renderAnimeIdentityStage(ch, area), 1000);
+          setTimeout(()=> finishChapterSuccess(ch), 1000);
         }
       }else{
         if(consumeMistakeShield(ch)) return;
@@ -3130,44 +3119,6 @@ function renderAnimeQuoteStage(ch, area){
   });
   wrap.appendChild(col1); wrap.appendChild(col2);
   area.appendChild(wrap);
-}
-
-function renderAnimeIdentityStage(ch, area){
-  area.innerHTML='';
-  const stageLabel = document.createElement('div');
-  stageLabel.className='animeStageLabel';
-  stageLabel.textContent = 'STAGE 2 OF 2 — THE NAME CHECKPOINT';
-  area.appendChild(stageLabel);
-
-  const wrap = document.createElement('div');
-  wrap.className='codeTerminal';
-  wrap.innerHTML = `<div>TERMINAL: "State your name, Detective. Don't forget it — Chihiro almost did."</div>`;
-  area.appendChild(wrap);
-
-  const inputWrap = document.createElement('div');
-  inputWrap.style.marginTop='14px';
-  const input = document.createElement('input');
-  input.type='text'; input.className='caseInput'; input.placeholder='Type your name...';
-  const submitBtn = document.createElement('button');
-  submitBtn.className='caseBtn small'; submitBtn.textContent='CONFIRM';
-  submitBtn.style.marginLeft='10px';
-  inputWrap.appendChild(input); inputWrap.appendChild(submitBtn);
-  area.appendChild(inputWrap);
-
-  function tryConfirm(){
-    const val = input.value.trim().toLowerCase();
-    if(val === gameState.playerName.trim().toLowerCase() && val.length>0){
-      document.getElementById('chapterFeedback').textContent = 'IDENTITY CONFIRMED. "Don\'t forget who you are." — Haku, probably, if he worked IT support.';
-      document.getElementById('chapterFeedback').className='feedbackLine good';
-      input.disabled = true; submitBtn.disabled = true;
-      finishChapterSuccess(ch);
-    }else{
-      document.getElementById('chapterFeedback').textContent = "That doesn't match the detective on file. Try your real name — this isn't the Spirit World, no aliases here.";
-      document.getElementById('chapterFeedback').className='feedbackLine bad';
-    }
-  }
-  submitBtn.addEventListener('click', tryConfirm);
-  input.addEventListener('keydown', e=>{ if(e.key==='Enter') tryConfirm(); });
 }
 
 /* ---------- LEGACY MINIGAME: Mood Matching (retained for reference) ---------- */

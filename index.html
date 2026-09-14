@@ -1295,6 +1295,14 @@ let soundVolume=0.38;
 let audioContext=null;
 let masterGain=null;
 let soundNoiseBuffer=null;
+let activeClipAudio=null;
+let activeClipStop=null;
+function stopActiveClip(){
+  if(typeof activeClipStop==='function') activeClipStop();
+  else if(activeClipAudio){ try{ activeClipAudio.pause(); activeClipAudio.currentTime=0; }catch(e){} }
+  activeClipAudio=null;
+  activeClipStop=null;
+}
 
 /* ---------- FILE-SPECIFIC MP3 MUSIC ---------- */
 let backgroundMusic=null;
@@ -1331,7 +1339,7 @@ function stopBackgroundMusic(fadeMs=450){
 }
 const backgroundMusicFallbacks={
   cinema:['cinema.mp3'],
-  archive:['acrhive.mp3'],
+  archive:['archive.mp3'],
   television:['television.mp3'],
   anime:['anime.mp3'],
   wildlife:['wildlife.mp3'],
@@ -1686,6 +1694,7 @@ function animateLibraryComplete(message){
 }
 
 function showScreen(id){
+  stopActiveClip();
   document.querySelectorAll('.screen').forEach(s=> s.classList.add('hidden'));
   const screen=document.getElementById(id);
   screen.classList.remove('hidden');
@@ -3366,14 +3375,6 @@ function renderMoodMatching(ch, area){
   playButton.className='audioPlayBtn';
   evidence.appendChild(playButton);
 
-  const openLink=document.createElement('a');
-  openLink.className='audioOpenLink';
-  openLink.target='_blank';
-  openLink.rel='noopener';
-  openLink.textContent='OPEN DRIVE PREVIEW';
-  openLink.hidden=true;
-  evidence.appendChild(openLink);
-
   const status=document.createElement('div');
   status.className='audioStatus';
   evidence.appendChild(status);
@@ -3428,14 +3429,18 @@ function renderMoodMatching(ch, area){
 
   function twentyBars(){ return 20; }
   function shuffle(values){ return values.slice().sort(()=>Math.random()-.5); }
-  function stopAudio(message){
+  function stopAudio(message, reset=false){
     if(stopTimer) clearTimeout(stopTimer);
     stopTimer=null;
     audio.pause();
+    if(reset){ try{ audio.currentTime=0; }catch(e){} }
     wave.classList.remove('playing');
     playButton.textContent='↻ PLAY CLIP';
     if(message) status.textContent=message;
   }
+  stopActiveClip();
+  activeClipAudio=audio;
+  activeClipStop=()=>stopAudio('',true);
   function normalizeGuess(value){
     return value.trim().toUpperCase().replace(/&/g,' AND ').replace(/[^A-Z0-9]+/g,' ').replace(/\s+/g,' ').trim();
   }
@@ -3457,10 +3462,6 @@ function renderMoodMatching(ch, area){
     const clip=clips[currentIndex];
     audio.src=clip.url;
     audio.load();
-    const driveId=clip.url.includes('id=') ? clip.url.split('id=')[1] : '';
-    openLink.href=driveId ? `https://drive.google.com/file/d/${driveId}/preview` : clip.url;
-    openLink.textContent=driveId ? 'OPEN DRIVE PREVIEW' : 'OPEN AUDIO FILE';
-    openLink.hidden=true;
     top.querySelector('#audioGuessCount').textContent=`CLIP ${String(currentIndex+1).padStart(2,'0')} / ${String(clips.length).padStart(2,'0')}`;
     progressDots.forEach((dot,i)=>{
       dot.className='audioProgressDot'+(i<currentIndex?' done':i===currentIndex?' active':'');
@@ -3491,18 +3492,18 @@ function renderMoodMatching(ch, area){
       if(stopTimer) clearTimeout(stopTimer);
       stopTimer=setTimeout(()=>stopAudio('Clip ended. You can replay it before submitting your guess.'),CLIP_LIMIT_MS);
     }).catch(()=>{
-      openLink.hidden=false;
-      status.textContent='This browser blocked Drive playback inside the game. Open the signal directly, listen, then return and submit your guess.';
+      wave.classList.remove('playing');
+      playButton.textContent='↻ PLAY CLIP';
+      status.textContent='Playback was blocked. Tap PLAY CLIP again to retry the signal.';
     });
   });
   audio.addEventListener('ended',()=>stopAudio('Clip ended. You can replay it before submitting your guess.'));
   audio.addEventListener('error',()=>{
     wave.classList.remove('playing');
     playButton.textContent='↻ PLAY CLIP';
-    openLink.hidden=false;
     const errorCode=audio.error ? audio.error.code : 0;
-    const reason=errorCode===4 ? 'The audio host does not allow this file to be streamed inside another page.' : 'The browser could not decode the audio response.';
-    status.textContent=`${reason} Use OPEN AUDIO FILE to listen directly, or host the MP3 in the same GitHub Pages project.`;
+    const reason=errorCode===4 ? 'The hosted audio file cannot be streamed here.' : 'The browser could not load or decode the audio file.';
+    status.textContent=`${reason} Check the MP3 URL and try again.`;
   });
   submitButton.addEventListener('click',()=>{
     if(roundLocked || !selectedSong || !selectedArtist) return;

@@ -1295,6 +1295,70 @@ let audioContext=null;
 let masterGain=null;
 let soundNoiseBuffer=null;
 
+/* ---------- FILE-SPECIFIC MP3 MUSIC ---------- */
+let backgroundMusic=null;
+let backgroundMusicPath='';
+const backgroundMusicTracks={
+  cinema:'audio/cinema.mp3',
+  archive:'audio/archive.mp3',
+  television:'audio/television.mp3',
+  anime:'audio/anime.mp3',
+  wildlife:'audio/wildlife.mp3',
+  travel:'audio/travel.mp3',
+  horror:'audio/horror.mp3',
+  relationship:'audio/relationship.mp3',
+  birthday:'audio/birthday.mp3'
+};
+const backgroundMusicLevel=.48;
+function stopBackgroundMusic(fadeMs=450){
+  const audio=backgroundMusic;
+  backgroundMusic=null;
+  backgroundMusicPath='';
+  if(!audio) return;
+  const finish=()=>{ try{ audio.pause(); audio.currentTime=0; audio.volume=0; }catch(e){} };
+  if(fadeMs<=0 || audio.paused){ finish(); return; }
+  const startVolume=audio.volume;
+  const startedAt=performance.now();
+  const fade=()=>{
+    if(backgroundMusic===audio) return;
+    const progress=Math.min(1,(performance.now()-startedAt)/fadeMs);
+    try{ audio.volume=Math.max(0,startVolume*(1-progress)); }catch(e){ finish(); return; }
+    if(progress<1) requestAnimationFrame(fade); else finish();
+  };
+  fade();
+}
+function startBackgroundMusic(trackId, loop=true){
+  if(!soundEnabled) return;
+  const source=backgroundMusicTracks[trackId];
+  if(!source) return;
+  if(backgroundMusic && backgroundMusicPath===source && !backgroundMusic.paused) return;
+  stopBackgroundMusic(260);
+  const audio=new Audio(source);
+  audio.loop=loop;
+  audio.preload='auto';
+  audio.volume=Math.max(0,Math.min(1,soundVolume*backgroundMusicLevel));
+  backgroundMusic=audio;
+  backgroundMusicPath=source;
+  audio.addEventListener('error',()=>{
+    if(backgroundMusic===audio){ backgroundMusic=null; backgroundMusicPath=''; }
+  },{once:true});
+  const playAttempt=audio.play();
+  if(playAttempt && typeof playAttempt.catch==='function'){
+    playAttempt.catch(()=>{
+      if(backgroundMusic===audio){ backgroundMusic=null; backgroundMusicPath=''; }
+    });
+  }
+}
+function syncBackgroundMusicForScreen(screenId){
+  let trackId='';
+  if(screenId==='screenChapter' && currentChapterIndex>=0 && chapters[currentChapterIndex]){
+    trackId=chapters[currentChapterIndex].id;
+  }else if(screenId==='screenRelationshipCase' || screenId==='screenMontage'){
+    trackId='relationship';
+  }
+  if(trackId) startBackgroundMusic(trackId); else stopBackgroundMusic();
+}
+
 function ensureAudio(){
   if(!soundEnabled) return false;
   try{
@@ -1318,7 +1382,12 @@ function setSoundEnabled(enabled, playFeedback=true){
     toggle.classList.toggle('soundOn',soundEnabled);
     toggle.setAttribute('aria-pressed',String(soundEnabled));
   }
-  if(soundEnabled && ensureAudio() && playFeedback) playSound('success');
+  if(soundEnabled){
+    if(ensureAudio() && playFeedback) playSound('success');
+    syncBackgroundMusicForScreen(document.querySelector('.screen:not(.hidden)')?.id || '');
+  }else{
+    stopBackgroundMusic();
+  }
 }
 function audioTone(startFreq,endFreq,duration,type='sine',level=.12,delay=0){
   if(!ensureAudio()) return;
@@ -1367,6 +1436,7 @@ function bindSoundControls(){
   if(volume) volume.addEventListener('input',()=>{
     soundVolume=Number(volume.value)/100;
     if(masterGain) masterGain.gain.value=soundVolume;
+    if(backgroundMusic) backgroundMusic.volume=Math.max(0,Math.min(1,soundVolume*backgroundMusicLevel));
   });
   document.addEventListener('pointerdown',(event)=>{
     if(event.target.closest('#soundToggle,#soundVolume')) return;
@@ -1600,6 +1670,7 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=> s.classList.add('hidden'));
   const screen=document.getElementById(id);
   screen.classList.remove('hidden');
+  syncBackgroundMusicForScreen(id);
   window.scrollTo(0,0);
   playSound('page');
   requestAnimationFrame(()=>animateScreenEntrance(screen));
@@ -2205,6 +2276,7 @@ function showCompletionModal(ch, resultNote, allFilesClosed){
 }
 
 function finishChapterSuccess(ch, resultNote){
+  stopBackgroundMusic();
   playSound('success');
   const passcodeClue=passcodeClues[ch.id];
   if(!gameState.unlockedPasscodeDigits) gameState.unlockedPasscodeDigits={};
@@ -2670,6 +2742,7 @@ function renderRelationshipGame(){
       renderRelationshipGame();
     }else{
       gameState.relationshipComplete=true;
+      stopBackgroundMusic();
       saveState();
       renderRelationshipGame();
     }
@@ -3894,6 +3967,7 @@ document.getElementById('revealContinueBtn').addEventListener('click', (e)=>{
   document.getElementById('letterGreeting').textContent = `Detective ${gameState.playerName},`;
   document.getElementById('letterHappyBday').textContent = `Happy Birthday, ${gameState.playerName}. ❤️`;
   showScreen('screenLetter');
+  startBackgroundMusic('birthday',false);
 });
 
 /* ============================================================

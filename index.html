@@ -2170,8 +2170,10 @@ function openChapter(i){
     btn.onclick = ()=> showHint(ch, idx);
   });
 
-  renderMinigame(ch);
+  // Show the chapter before creating its audio clip. showScreen() stops any
+  // clip from the previous screen, so rendering first would stop the new clip.
   showScreen('screenChapter');
+  renderMinigame(ch);
 }
 
 function updateHintCounterNote(ch){
@@ -3501,10 +3503,20 @@ function renderMoodMatching(ch, area){
       wave.classList.add('playing');
       playButton.textContent='❚❚ PAUSE CLIP';
       status.textContent='Signal live — listen closely. Playback stops when the clip ends.';
-    }).catch(()=>{
+    }).catch(error=>{
       wave.classList.remove('playing');
       playButton.textContent='↻ PLAY CLIP';
-      status.textContent='Playback was blocked. Tap PLAY CLIP again to retry the signal.';
+      const mediaError=audio.error;
+      const errorCode=mediaError ? mediaError.code : 0;
+      let reason='The clip could not start. Check the MP3 URL and try again.';
+      if(error && error.name==='NotAllowedError'){
+        reason='The browser blocked playback. Click PLAY CLIP directly to start the signal.';
+      }else if((error && error.name==='NotSupportedError') || errorCode===4){
+        reason='This clip could not be loaded or decoded. The hosted MP3 may be unavailable.';
+      }else if(errorCode===1){
+        reason='The clip load was cancelled. Click PLAY CLIP again to retry the signal.';
+      }
+      status.textContent=reason;
     });
   });
   audio.addEventListener('ended',()=>stopAudio('Clip ended. You can replay it before submitting your guess.'));

@@ -1290,6 +1290,7 @@ const gameState = {
    SOUND DESK — lightweight Web Audio effects, no audio files required
    ============================================================ */
 let soundEnabled=false;
+let soundPreferenceSet=false;
 let soundVolume=0.38;
 let audioContext=null;
 let masterGain=null;
@@ -1298,16 +1299,17 @@ let soundNoiseBuffer=null;
 /* ---------- FILE-SPECIFIC MP3 MUSIC ---------- */
 let backgroundMusic=null;
 let backgroundMusicPath='';
+const githubAudioBase='https://raw.githubusercontent.com/pandyajatan244-jpg/case-003-missing-birthday/main/audio/';
 const backgroundMusicTracks={
-  cinema:'audio/cinema.mp3',
-  archive:'audio/archive.mp3',
-  television:'audio/television.mp3',
-  anime:'audio/anime.mp3',
-  wildlife:'audio/wildlife.mp3',
-  travel:'audio/travel.mp3',
-  horror:'audio/horror.mp3',
-  relationship:'audio/relationship.mp3',
-  birthday:'audio/birthday.mp3'
+  cinema:githubAudioBase+'cinema.mp3',
+  archive:githubAudioBase+'acrhive.mp3',
+  television:githubAudioBase+'television.mp3',
+  anime:githubAudioBase+'anime.mp3',
+  wildlife:githubAudioBase+'wildlife.mp3',
+  travel:githubAudioBase+'travel.mp3',
+  horror:githubAudioBase+'horror.mp3',
+  relationship:githubAudioBase+'relationship.mp3',
+  birthday:githubAudioBase+'birthday.mp3'
 };
 const backgroundMusicLevel=.48;
 function stopBackgroundMusic(fadeMs=450){
@@ -1327,27 +1329,44 @@ function stopBackgroundMusic(fadeMs=450){
   };
   fade();
 }
+const backgroundMusicFallbacks={
+  cinema:['cinema.mp3'],
+  archive:['archive.mp3'],
+  television:['television.mp3'],
+  anime:['anime.mp3'],
+  wildlife:['wildlife.mp3'],
+  travel:['travel.mp3'],
+  horror:['horror.mp3'],
+  relationship:['relationship.mp3'],
+  birthday:['birthday.mp3']
+};
 function startBackgroundMusic(trackId, loop=true){
   if(!soundEnabled) return;
-  const source=backgroundMusicTracks[trackId];
-  if(!source) return;
-  if(backgroundMusic && backgroundMusicPath===source && !backgroundMusic.paused) return;
+  const primary=backgroundMusicTracks[trackId];
+  if(!primary) return;
+  const sources=[primary,...(backgroundMusicFallbacks[trackId]||[])];
+  if(backgroundMusic && sources.includes(backgroundMusicPath) && !backgroundMusic.paused) return;
   stopBackgroundMusic(260);
-  const audio=new Audio(source);
-  audio.loop=loop;
-  audio.preload='auto';
-  audio.volume=Math.max(0,Math.min(1,soundVolume*backgroundMusicLevel));
-  backgroundMusic=audio;
-  backgroundMusicPath=source;
-  audio.addEventListener('error',()=>{
-    if(backgroundMusic===audio){ backgroundMusic=null; backgroundMusicPath=''; }
-  },{once:true});
-  const playAttempt=audio.play();
-  if(playAttempt && typeof playAttempt.catch==='function'){
-    playAttempt.catch(()=>{
-      if(backgroundMusic===audio){ backgroundMusic=null; backgroundMusicPath=''; }
-    });
-  }
+  const trySource=(sourceIndex)=>{
+    const source=sources[sourceIndex];
+    if(!source) return;
+    const audio=new Audio(source);
+    audio.loop=loop;
+    audio.preload='auto';
+    audio.volume=Math.max(0,Math.min(1,soundVolume*backgroundMusicLevel));
+    backgroundMusic=audio;
+    backgroundMusicPath=source;
+    const failed=()=>{
+      if(backgroundMusic!==audio) return;
+      backgroundMusic=null;
+      backgroundMusicPath='';
+      if(sourceIndex<sources.length-1) trySource(sourceIndex+1);
+    };
+    audio.addEventListener('error',failed,{once:true});
+    const playAttempt=audio.play();
+    if(playAttempt && typeof playAttempt.catch==='function') playAttempt.catch(failed);
+  };
+  trySource(0);
 }
 function syncBackgroundMusicForScreen(screenId){
   let trackId='';
@@ -1432,7 +1451,7 @@ function playSound(kind){
 function bindSoundControls(){
   const toggle=document.getElementById('soundToggle');
   const volume=document.getElementById('soundVolume');
-  if(toggle) toggle.addEventListener('click',(event)=>{ event.stopPropagation(); setSoundEnabled(!soundEnabled); });
+  if(toggle) toggle.addEventListener('click',(event)=>{ event.stopPropagation(); soundPreferenceSet=true; setSoundEnabled(!soundEnabled); });
   if(volume) volume.addEventListener('input',()=>{
     soundVolume=Number(volume.value)/100;
     if(masterGain) masterGain.gain.value=soundVolume;
@@ -2107,6 +2126,10 @@ function renderEvidenceBoard(){
    6. CHAPTER OPEN + SHARED CHROME
    ============================================================ */
 function openChapter(i){
+  if(!soundPreferenceSet){
+    soundPreferenceSet=true;
+    setSoundEnabled(true,false);
+  }
   currentChapterIndex = i;
   const ch = chapters[i];
   gameState.hintsUsed[ch.id] = gameState.hintsUsed[ch.id] || 0;

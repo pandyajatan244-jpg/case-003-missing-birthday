@@ -794,6 +794,8 @@ input.caseInput::placeholder{ color:#69736d; }
 .passcodeTimer.critical{ color:#ff8b7e; border-color:#ff8b7e; background:rgba(169,67,61,.28); }
 .passcodeHintBtn{ margin:8px auto 2px; }
 .passcodeHintBox{ width:min(620px,100%); margin:10px auto 4px; padding:10px 12px; border:1px dashed var(--gold); color:var(--paperBright); background:rgba(215,184,102,.08); font:700 .7rem/1.55 'Courier Prime',monospace; text-align:left; }
+.passcodeJumbled{ margin:12px auto 8px; padding:9px 12px; border:1px dashed var(--gold); background:rgba(215,184,102,.08); color:var(--gold); font:700 .78rem/1.4 'Courier Prime',monospace; letter-spacing:5px; text-align:center; }
+.passcodeJumbled::before{ content:'JUMBLED DIGIT FRAGMENTS / '; color:var(--dim); letter-spacing:1.2px; font-size:.56rem; }
 .passcodeDisplay{ margin:12px auto 14px; min-height:48px; color:var(--paperBright); font:700 1.8rem/1 'Courier Prime',monospace; letter-spacing:10px; text-indent:10px; }
 .passcodeKeypad{ display:grid; grid-template-columns:repeat(3,54px); gap:8px; justify-content:center; margin:0 auto 10px; }
 .passcodeKey{ width:54px; height:42px; border:1px solid var(--line); background:rgba(14,21,22,.9); color:var(--paperBright); cursor:pointer; font:700 .85rem 'Courier Prime',monospace; transition:transform .16s,border-color .16s,background .16s; }
@@ -908,6 +910,12 @@ input.caseInput::placeholder{ color:#69736d; }
 .photoSlot{ aspect-ratio:3/4; min-height:210px; background:#0c1112; border:1px solid var(--line); box-shadow:5px 6px 0 rgba(0,0,0,.24); }
 .photoSlot img{ display:block; width:100%; height:100%; object-fit:cover; object-position:center; opacity:.96; transition:transform .35s ease,filter .35s ease; }
 .photoSlot:hover img{ transform:scale(1.035); filter:saturate(1.08) contrast(1.03); }
+.photoSlot{ cursor:zoom-in; }
+.photoLightbox{ position:fixed; inset:0; z-index:320; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(3,6,7,.94); }
+.photoLightboxImage{ max-width:min(94vw,1400px); max-height:84vh; width:auto; height:auto; object-fit:contain; border:1px solid var(--lineStrong); box-shadow:0 18px 70px rgba(0,0,0,.7); }
+.photoLightboxClose{ position:absolute; top:18px; right:20px; z-index:1; padding:8px 12px; border:1px solid var(--gold); background:rgba(8,12,13,.86); color:var(--gold); cursor:pointer; font:700 .68rem/1 'Courier Prime',monospace; letter-spacing:1px; }
+.photoLightboxClose:hover{ background:var(--gold); color:var(--coal); }
+.photoLightboxCaption{ position:absolute; left:20px; right:20px; bottom:18px; color:var(--paperBright); text-align:center; font:700 .7rem/1.4 'Courier Prime',monospace; letter-spacing:.6px; }
 .photoSlot .caption{ z-index:1; text-align:left; line-height:1.35; }
 @media (max-width:600px){ .montageGrid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .photoSlot{ min-height:180px; } }
 @media (prefers-reduced-motion:reduce){ .photoSlot img{ transition:none; } }
@@ -1038,6 +1046,7 @@ input.caseInput::placeholder{ color:#69736d; }
     <div class="passcodeTimer" id="passcodeTimer" aria-live="polite">⏱️ TIME REMAINING: 60</div>
     <button class="caseBtn secondary small" id="passcodeHintBtn" type="button">💡 REQUEST PASSCODE HINT</button>
     <div class="passcodeHintBox hidden" id="passcodeHintBox">HINT: The fragments are a date. Position labels beat card order: the first four digits are the day and month, and the final four digits are the year.</div>
+    <div class="passcodeJumbled" id="passcodeJumbled" aria-label="Jumbled passcode digits"></div>
     <div class="passcodeDisplay" id="passcodeDisplay" aria-live="polite">_ _ _ _ _ _ _ _</div>
     <div class="passcodeKeypad" id="passcodeKeypad"></div>
     <div class="relationshipFeedback" id="passcodeFeedback" aria-live="polite"></div>
@@ -1179,6 +1188,12 @@ input.caseInput::placeholder{ color:#69736d; }
   <button class="caseBtn" id="montageContinueBtn">ROLL CREDITS</button>
 </div>
 
+<div class="photoLightbox hidden" id="photoLightbox" role="dialog" aria-modal="true" aria-label="Full-screen evidence photo">
+  <button class="photoLightboxClose" id="photoLightboxClose" type="button">CLOSE PHOTO ✕</button>
+  <img class="photoLightboxImage" id="photoLightboxImage" alt="">
+  <div class="photoLightboxCaption" id="photoLightboxCaption"></div>
+</div>
+
 <!-- ============ 12. CREDITS ============ -->
 <div class="screen hidden" id="screenCredits">
   <div class="caseTitle">CASE 003</div>
@@ -1201,7 +1216,7 @@ input.caseInput::placeholder{ color:#69736d; }
     <div class="role">HINT-SHAMING DEPARTMENT</div><div class="who">This entire narrator, unapologetically</div>
     <div class="role">STUNT DOUBLE FOR "THE ONE WHO KNOCKS"</div><div class="who">Nobody. That line stands alone.</div>
     <div class="role">CATERING</div><div class="who">Lettuce, on behalf of the capybara</div>
-    <div class="role">FINAL AUTHORITY</div><div class="who">Her ❤️</div>
+    <div class="role">FINAL AUTHORITY</div><div class="who">You ❤️</div>
     <div class="role">RATING</div><div class="who">Certified 5 Stars ⭐⭐⭐⭐⭐ — "Would get arrested by this detective again." — The Capybara</div>
   </div>
   <div style="max-width:480px; font-size:.75rem; color:var(--dim); margin-top:18px; line-height:1.7; text-align:left;">
@@ -1388,7 +1403,7 @@ const observerScanText = {
   anime:'EVIDENCE SCAN: The file has two puzzle layers — dialogue and deliberately bad plot summaries — followed by a clean case closure.',
   sound:'EVIDENCE SCAN: This is a one-to-one board. Each song title has exactly one artist, and every artist is used once.',
   wildlife:'EVIDENCE SCAN: The wildlife file is a three-stage trail: match witnesses, repeat Pikachu’s signal, then identify the sleeping witness and clear the capybara.',
-  travel:'EVIDENCE SCAN: Rebuild Chikkamagaluru first: waterfall, monkey corn theft, Z Point, photos, lake, water sports, shopping, then home. Mysore follows with Palace, Zoo, Chamundi Hills, breakfast, Vrindavan Garden, and KRS Temple.',
+  travel:'EVIDENCE SCAN: Rebuild Chikkamagaluru first: Baba Budangiri, waterfall, monkey corn theft, Z Point, photos, lake, water sports, shopping, then home. Mysore follows with Palace, Zoo, Chamundi Hills, breakfast, Vrindavan Garden, and KRS Temple.',
   horror:'EVIDENCE SCAN: The strangest emoji is usually the decisive clue. Spirals, showers, trains, red doubles, balloons, and haunted houses each point toward a very specific nightmare.'
 };
 const analystOverlayText = {
@@ -1398,7 +1413,7 @@ const analystOverlayText = {
   anime:'PATTERN OVERLAY: Complete the dialogue file and the terrible-summary file. The jigsaw stage has been removed.',
   sound:'PATTERN OVERLAY: Six audio clips lead to six song-and-artist guesses. A correct identification unlocks exactly one next signal.',
   wildlife:'PATTERN OVERLAY: The witness map has nine matches, the Pikachu signal has four beats, and the final stage requires Jigglypuff before the capybara.',
-  travel:'PATTERN OVERLAY: The timeline has fourteen stops: eight in Chikkamagaluru, followed by six in Mysore. Complete one city before the other.',
+  travel:'PATTERN OVERLAY: The timeline has fifteen stops: nine in Chikkamagaluru, followed by six in Mysore. Complete one city before the other.',
   horror:'PATTERN OVERLAY: There are 15 independent emoji rounds. A wrong option does not change the next round; keep reading the signature object in the clue.'
 };
 const chaoticInterventionText = {
@@ -1408,7 +1423,7 @@ const chaoticInterventionText = {
   anime:'CHAOTIC INTERVENTION: Do not skip the emotional clues. The anime file is a two-game relay, and the final checkpoint asks for the detective name you entered.',
   sound:'CHAOTIC INTERVENTION: Start with the most unmistakable signal. Thunderstruck belongs to AC/DC; the rest of the playlist is waiting for your ears.',
   wildlife:'CHAOTIC INTERVENTION: The capybara is not the villain. Match the animal evidence first, repeat ⚡ → 🌟 → ⚡ → 💛, then click Jigglypuff before clearing the capybara.',
-  travel:'CHAOTIC INTERVENTION: Start with the waterfall, then place the corn theft before Z Point. Finish Chikkamagaluru before moving to Mysore; the monkeys have no timeline authority.',
+  travel:'CHAOTIC INTERVENTION: Start with Baba Budangiri, then the waterfall, then place the corn theft before Z Point. Finish Chikkamagaluru before moving to Mysore; the monkeys have no timeline authority.',
   horror:'CHAOTIC INTERVENTION: Trust the oddly specific object: spiral means Uzumaki, shower means Psycho, red doubles mean Us, and zombie train means Train to Busan.'
 };
 function getActiveProfile(){ return INVESTIGATION_PROFILES[gameState.detectiveType] || INVESTIGATION_PROFILES.observer; }
@@ -1790,11 +1805,11 @@ const chapters = [
     id:'travel', num:'07', icon:'🗺️', label:'TWO TRIPS, ONE SUSPICIOUS ITINERARY', gameType:'Trip Timeline Heist',
     eyebrow:'TWO TRIPS, ONE SUSPICIOUS ITINERARY — THE MEMORY HEIST',
     title:'Rebuild the routes before the evidence escapes',
-    flavor:'A monkey stole the corn, Z Point blew half the clues away, and the shopping bag is refusing to testify. Reconstruct Chikkamagaluru first, then Mysore.',
+    flavor:'A short Baba Budangiri trek opened the route, then the waterfall, the corn theft, and Z Point turned the trip into a full investigation. Reconstruct Chikkamagaluru first, then Mysore.',
     hints:[
-      "Chikkamagaluru starts with the waterfall, then the corn theft, then Z Point's wind. Mysore starts with Palace, Zoo, and Chamundi Hills.",
+      "Chikkamagaluru starts with Baba Budangiri: a short trek through the high Western Ghats. Then come the waterfall, the corn theft, and Z Point's wind. Mysore starts with Palace, Zoo, and Chamundi Hills.",
       "Keep each city together: Chikkamagaluru ends with water sports, recovery shopping, and home; Mysore continues on day two with breakfast, Vrindavan Garden, and KRS Temple.",
-      "Full order: Chikkamagaluru — Waterfall → Corn Theft → Z Point → Scenic Photos → Lake → Water Sports → Recovery Shopping → Back Home. Mysore — Mysore Palace → Zoo → Chamundi Hills → Authentic South Indian Breakfast → Vrindavan Garden → KRS Temple."
+      "Full order: Chikkamagaluru — Baba Budangiri Short Trek → Waterfall → Corn Theft → Z Point → Scenic Photos → Lake → Water Sports → Recovery Shopping → Back Home. Mysore — Mysore Palace → Zoo → Chamundi Hills → Authentic South Indian Breakfast → Vrindavan Garden → KRS Temple."
     ],
     banter:[
       "A hint already? The monkeys have better operational discipline than this.",
@@ -1802,7 +1817,7 @@ const chapters = [
       "Full route recovered. The corn is still missing, the shopping bag remains uncooperative, and the monkeys deny everything."
     ],
     evidence:'EVIDENCE 15 — a soggy route map, a corn cob with suspicious bite marks, photographs from Z Point, and two ticket stubs from trips that were far too specific to be coincidence.',
-    completion:'Travel File Complete. Two itineraries restored, fourteen memories placed in order, and one corn theft remains unsolved.'
+    completion:'Travel File Complete. Two itineraries restored, fifteen memories placed in order, and one corn theft remains unsolved.'
   },
   {
     id:'horror', num:'08', icon:'🕯️', label:'THE WALLPAPER BLINKED FIRST', gameType:'Emoji Nightmare Identification',
@@ -2115,7 +2130,7 @@ const completionWitByFile={
   anime:'The timeline has been reassembled. The red string is taking a well-earned emotional break.',
   sound:'The playlist is now legally a witness. It requests one encore and a snack.',
   wildlife:'The capybara remains cleared. The otters, however, are still refusing to comment.',
-  travel:'Fourteen memories recovered. The monkeys remain uncooperative, Z Point is still windy, and the shopping bag refuses to testify.',
+  travel:'Fifteen memories recovered. The Baba Budangiri trek is accounted for, the monkeys remain uncooperative, Z Point is still windy, and the shopping bag refuses to testify.',
   horror:'The nightmares have been identified. The wallpaper has been advised not to blink again.'
 };
 
@@ -2271,6 +2286,16 @@ function updatePasscodeDisplay(){
   if(!display) return;
   display.textContent=Array.from({length:8},(_,i)=>passcodeDigits[i] || '_').join(' ');
 }
+function renderJumbledPasscodeDigits(){
+  const display=document.getElementById('passcodeJumbled');
+  if(!display) return;
+  const digits=PASSCODE.split('');
+  for(let i=digits.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [digits[i],digits[j]]=[digits[j],digits[i]];
+  }
+  display.textContent=digits.join(' · ');
+}
 function resetPasscodeDigitsKeepingHints(){
   passcodeDigits=Array.from({length:8},(_,i)=>passcodeHintPositions.includes(i) ? PASSCODE[i] : '');
 }
@@ -2317,6 +2342,7 @@ function renderPasscodeGate(){
   document.getElementById('passcodeBackBtn').classList.remove('hidden');
   document.getElementById('passcodeGameOver').classList.add('hidden');
   document.getElementById('passcodeHintBox').classList.add('hidden');
+  renderJumbledPasscodeDigits();
   const clueGrid=document.getElementById('passcodeClueGrid');
   const feedback=document.getElementById('passcodeFeedback');
   const keypad=document.getElementById('passcodeKeypad');
@@ -2495,11 +2521,10 @@ const relationshipStations = [
       {icon:'🍚', label:'CURD RICE', value:'CURD RICE'},
       {icon:'🥭', label:'RICE WITH MANGO PICKLE', value:'RICE WITH MANGO PICKLE'},
       {icon:'🍔', label:'BURGER', value:'BURGER'},
-      {icon:'🍦', label:'ICE CREAM', value:'ICE CREAM'},
       {icon:'🍕', label:'PIZZA', value:'PIZZA'},
-      {icon:'🍭', label:'COTTON CANDY', value:'COTTON CANDY'}
-    ], correct:['PANI PURI','SUKHA PURI','SPICY CHEESE MAGGI','PASTA','COCONUT WATER','TTEOKBOKKI','KHOU SUEY','CURD RICE','RICE WITH MANGO PICKLE','COTTON CANDY'],
-    success:'MENU VERIFIED — ten favorites logged, including cotton candy and the excellent rice-and-mango-pickle evidence.'
+      {icon:'🍭', label:'COTTON CANDY ICE CREAM', value:'COTTON CANDY ICE CREAM'}
+    ], correct:['PANI PURI','SUKHA PURI','SPICY CHEESE MAGGI','PASTA','COCONUT WATER','TTEOKBOKKI','KHOU SUEY','CURD RICE','RICE WITH MANGO PICKLE','COTTON CANDY ICE CREAM'],
+    success:'MENU VERIFIED — ten favorites logged, including cotton candy ice cream and the excellent rice-and-mango-pickle evidence.'
   },
   {
     station:'PASSPORT PAGE 06 / DATE-NIGHT ALIBI', icon:'🎟️',
@@ -2706,7 +2731,7 @@ function renderHorrorEmojiQuiz(ch, area){
     {emoji:'🚆 🧟‍♂️ 🧳 🧑‍🍼', clue:'A train leaves the station with passengers, luggage, and a rapidly growing problem in which every stop is now a zombie buffet.', answer:'TRAIN TO BUSAN', options:['TRAIN TO BUSAN','THE CONJURING','IT','HEREDITARY'], note:'The train is delayed due to undead activity. Please remain behind the metaphorical yellow line.'},
     {emoji:'👨‍👩‍👧‍👦 🕯️ 🪦 🫥', clue:'A family inherits grief, secrets, and the world’s least relaxing family tree. Group therapy was apparently not available.', answer:'HEREDITARY', options:['HEREDITARY','THE SHINING','HOKUM','PSYCHO'], note:'Family history has entered the chat, brought a cursed heirloom, and refused to leave.'},
     {emoji:'🏠 👻 🧒 🕰️', clue:'A beautiful old house collects siblings, ghosts, grief, and one staircase that has clearly been hiding something since the estate agent arrived.', answer:'THE HAUNTING OF HILL HOUSE', options:['THE HAUNTING OF HILL HOUSE','THE NUN','UZUMAKI','THE SILENCE OF THE LAMBS'], note:'The house has a long-term lease on everyone’s unresolved feelings and no intention of returning the deposit.'},
-    {emoji:'🌑 🪦 🧿 🕯️', clue:'A cursed story crawls out of the archive wearing a warning label, a suspicious stare, and the energy of something that should not be opened after midnight.', answer:'HOKUM', options:['HOKUM','ANNABELLE','GET OUT','IT: WELCOME TO DERRY'], note:'The archive has stamped this one: weird, cursed, and absolutely not suitable for bedtime or basements.'}
+    {emoji:'🏨 🕯️ 🧳 🧙‍♀️', clue:'A novelist visits a remote Irish inn to scatter his parents’ ashes, hears about a witch haunting the honeymoon suite, and discovers that the hotel’s hospitality package includes grief, folklore, and one deeply terrible checkout experience.', answer:'HOKUM', options:['HOKUM','ANNABELLE','GET OUT','IT: WELCOME TO DERRY'], note:'A slow-burn folk-horror mystery where the inn has secrets, the witch has a schedule, and the honeymoon suite absolutely should not be booked.'}
   ];
   let index=0;
   const progress=document.createElement('div'); progress.className='horrorProgress'; area.appendChild(progress);
@@ -3055,6 +3080,7 @@ function renderAnimeEmojiAnswers(ch, area){
   const rounds=[
     {plot:'A young witch moves out, starts a delivery business, and discovers that flying is easier than figuring out rent, confidence, and a talking cat.', answers:["KIKI'S DELIVERY SERVICE",'KIKIS DELIVERY SERVICE']},
     {plot:'A man goes on holiday expecting sun, swimming, and relaxation, but the beach trip becomes an aggressively chaotic drinking competition with a diving club.', answers:['GRAND BLUE','GRAND BLUE DREAMING']},
+    {plot:'Two brothers travel around looking for a philosopher’s stone after one lost an arm and the other lost his entire body, so naturally the younger brother becomes a walking suit of armour with excellent posture and no pockets.', answers:['FULLMETAL ALCHEMIST BROTHERHOOD','FULLMETAL ALCHEMIST: BROTHERHOOD','FULLMETAL ALCHEMIST']},
     {plot:'A wolf-raised young woman joins a forest argument between industry, gods, and a giant boar who is having the worst day imaginable.', answers:['PRINCESS MONONOKE','MONONOKE HIME']},
     {plot:'A wizard lives in a moving house, changes his appearance whenever emotionally inconvenienced, and lets a fire demon handle the household administration.', answers:["HOWL'S MOVING CASTLE",'HOWLS MOVING CASTLE']},
     {plot:'A boy who was unkind at school grows up, learns that consequences are real, and tries to reconnect with the girl he hurt while everyone struggles with communication.', answers:['A SILENT VOICE','THE SILENT VOICE','KOE NO KATACHI']}
@@ -3533,9 +3559,10 @@ function renderReorder(ch, area){
   const trips = [
     {
       key:'chikka', name:'CHIKKAMAGALURU — THE MONKEY INCIDENT',
-      order:["Waterfall Reconnaissance","Corn Theft","Z Point Wind Trial","Scenic Evidence Shoot","Lake Surveillance","Water Sports Operation","Recovery Shopping Mission","Return Home"],
+      order:["Baba Budangiri Short Trek","Waterfall Reconnaissance","Corn Theft","Z Point Wind Trial","Scenic Evidence Shoot","Lake Surveillance","Water Sports Operation","Recovery Shopping Mission","Return Home"],
       flavorMap:{
-        "Waterfall Reconnaissance":"The investigation begins at the waterfall: dramatic, loud, and impossible to ignore.",
+        "Baba Budangiri Short Trek":"The route opens with a short trek at Baba Budangiri, high in the Western Ghats: scenic, manageable, and enough to make everyone's legs file a complaint.",
+        "Waterfall Reconnaissance":"The investigation continues at the waterfall: dramatic, loud, and impossible to ignore.",
         "Corn Theft":"Aggressive monkeys acquired the corn without consent, a receipt, or even a believable alibi.",
         "Z Point Wind Trial":"Z Point's winds were so fast that several clues, hairstyles, and probably a little dignity were lost.",
         "Scenic Evidence Shoot":"Photographs were taken at an extremely suspiciously beautiful location. The landscape has no alibi.",
@@ -3621,7 +3648,7 @@ function renderReorder(ch, area){
         const isCorrect = JSON.stringify(filled) === JSON.stringify(trip.order);
         if(isCorrect){
           document.getElementById('chapterFeedback').textContent = trip.key==='chikka'
-            ? 'CHIKKAMAGALURU RECONSTRUCTED. Eight stops recovered. The monkeys deny everything; the corn remains missing.'
+            ? 'CHIKKAMAGALURU RECONSTRUCTED. Nine stops recovered, from the Baba Budangiri trek to the missing corn. The monkeys deny everything.'
             : 'MYSORE RECONSTRUCTED. Palace, zoo, hills, breakfast, gardens, and the water-surrounded temple are all accounted for.';
           document.getElementById('chapterFeedback').className='feedbackLine good';
           document.getElementById('tripTab'+tripIndex).classList.remove('activeTab');
@@ -3910,10 +3937,39 @@ function renderMontage(){
   items.forEach((it,index)=>{
     const slot = document.createElement('div');
     slot.className='photoSlot';
-    slot.innerHTML = `<img src="photos/${it.file}" alt="${it.cap}" loading="${index < 4 ? 'eager' : 'lazy'}"><div class="caption">${it.label}<br>${it.cap}</div>`;
+    const src=`photos/${it.file}`;
+    slot.innerHTML = `<img src="${src}" alt="${it.cap}" loading="${index < 4 ? 'eager' : 'lazy'}"><div class="caption">${it.label}<br>${it.cap}</div>`;
+    slot.setAttribute('role','button');
+    slot.setAttribute('tabindex','0');
+    slot.setAttribute('aria-label',`Open ${it.cap} full screen`);
+    slot.addEventListener('click',()=>openPhotoLightbox(src,it.cap,`${it.label} — ${it.cap}`));
+    slot.addEventListener('keydown',event=>{ if(event.key==='Enter' || event.key===' '){ event.preventDefault(); openPhotoLightbox(src,it.cap,`${it.label} — ${it.cap}`); } });
     grid.appendChild(slot);
   });
 }
+
+function openPhotoLightbox(src,alt,caption){
+  const lightbox=document.getElementById('photoLightbox');
+  const image=document.getElementById('photoLightboxImage');
+  const captionEl=document.getElementById('photoLightboxCaption');
+  if(!lightbox || !image) return;
+  image.src=src;
+  image.alt=alt || '';
+  captionEl.textContent=caption || alt || '';
+  lightbox.classList.remove('hidden');
+  document.body.classList.add('modalOpen');
+  document.getElementById('photoLightboxClose').focus();
+}
+function closePhotoLightbox(){
+  const lightbox=document.getElementById('photoLightbox');
+  if(!lightbox) return;
+  lightbox.classList.add('hidden');
+  document.body.classList.remove('modalOpen');
+  document.getElementById('photoLightboxImage').src='';
+}
+document.getElementById('photoLightboxClose').addEventListener('click',closePhotoLightbox);
+document.getElementById('photoLightbox').addEventListener('click',event=>{ if(event.target.id==='photoLightbox') closePhotoLightbox(); });
+document.addEventListener('keydown',event=>{ if(event.key==='Escape' && !document.getElementById('photoLightbox').classList.contains('hidden')) closePhotoLightbox(); });
 
 /* ============================================================
    12. CREDITS

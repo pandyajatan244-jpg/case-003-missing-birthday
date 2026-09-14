@@ -1244,7 +1244,7 @@ const observerScanText = {
   anime:'EVIDENCE SCAN: The file has two puzzle layers — dialogue and deliberately bad plot summaries — followed by the final name checkpoint.',
   sound:'EVIDENCE SCAN: This is a one-to-one board. Each song title has exactly one artist, and every artist is used once.',
   wildlife:'EVIDENCE SCAN: The wildlife file is a three-stage trail: match witnesses, repeat Pikachu’s signal, then identify the sleeping witness and clear the capybara.',
-  travel:'EVIDENCE SCAN: Place four Chikkamagaluru stops first, then four Mysore stops. The travel file is now a short chronology check.',
+  travel:'EVIDENCE SCAN: Rebuild Chikkamagaluru first: waterfall, monkey corn theft, Z Point, photos, lake, water sports, shopping, then home. Mysore follows with Palace, Zoo, Chamundi Hills, breakfast, Vrindavan Garden, and KRS Temple.',
   horror:'EVIDENCE SCAN: The strangest emoji is usually the decisive clue. Spirals, showers, trains, red doubles, balloons, and haunted houses each point toward a very specific nightmare.'
 };
 const analystOverlayText = {
@@ -1254,7 +1254,7 @@ const analystOverlayText = {
   anime:'PATTERN OVERLAY: Complete the dialogue file and the terrible-summary file, then pass the name checkpoint. The jigsaw stage has been removed.',
   sound:'PATTERN OVERLAY: Six audio clips lead to six song-and-artist guesses. A correct identification unlocks exactly one next signal.',
   wildlife:'PATTERN OVERLAY: The witness map has nine matches, the Pikachu signal has four beats, and the final stage requires Jigglypuff before the capybara.',
-  travel:'PATTERN OVERLAY: The short chronology has eight stops: four in Chikkamagaluru, followed by four in Mysore.',
+  travel:'PATTERN OVERLAY: The timeline has fourteen stops: eight in Chikkamagaluru, followed by six in Mysore. Complete one city before the other.',
   horror:'PATTERN OVERLAY: There are 15 independent emoji rounds. A wrong option does not change the next round; keep reading the signature object in the clue.'
 };
 const chaoticInterventionText = {
@@ -1264,7 +1264,7 @@ const chaoticInterventionText = {
   anime:'CHAOTIC INTERVENTION: Do not skip the emotional clues. The anime file is a two-game relay, and the final checkpoint asks for the detective name you entered.',
   sound:'CHAOTIC INTERVENTION: Start with the most unmistakable signal. Thunderstruck belongs to AC/DC; the rest of the playlist is waiting for your ears.',
   wildlife:'CHAOTIC INTERVENTION: The capybara is not the villain. Match the animal evidence first, repeat ⚡ → 🌟 → ⚡ → 💛, then click Jigglypuff before clearing the capybara.',
-  travel:'CHAOTIC INTERVENTION: Start with Chikkamagaluru, place the waterfall before coffee, then move to Mysore. The monkeys get one tiny cameo and no timeline authority.',
+  travel:'CHAOTIC INTERVENTION: Start with the waterfall, then place the corn theft before Z Point. Finish Chikkamagaluru before moving to Mysore; the monkeys have no timeline authority.',
   horror:'CHAOTIC INTERVENTION: Trust the oddly specific object: spiral means Uzumaki, shower means Psycho, red doubles mean Us, and zombie train means Train to Busan.'
 };
 function getActiveProfile(){ return INVESTIGATION_PROFILES[gameState.detectiveType] || INVESTIGATION_PROFILES.observer; }
@@ -1601,22 +1601,22 @@ const chapters = [
     completion:'Wildlife File Complete. Capybara cleared, snake accounted for, Pikachu charged, Jigglypuff awake-ish, and every furry witness safely returned.'
   },
   {
-    id:'travel', num:'07', icon:'🗺️', label:'TWO TRIPS, ONE SUSPICIOUS ITINERARY', gameType:'Simple Trip Order',
-    eyebrow:'TWO TRIPS, ONE SUSPICIOUS ITINERARY — THE SHORT ROUTE',
-    title:'Put the two trips in order',
-    flavor:'Two cities, four stops each. Choose a memory, then place it in the next slot — Chikkamagaluru first, then Mysore. The monkeys get one brief appearance.',
+    id:'travel', num:'07', icon:'🗺️', label:'TWO TRIPS, ONE SUSPICIOUS ITINERARY', gameType:'Trip Timeline Heist',
+    eyebrow:'TWO TRIPS, ONE SUSPICIOUS ITINERARY — THE MEMORY HEIST',
+    title:'Rebuild the routes before the evidence escapes',
+    flavor:'A monkey stole the corn, Z Point blew half the clues away, and the shopping bag is refusing to testify. Reconstruct Chikkamagaluru first, then Mysore.',
     hints:[
-      "Chikkamagaluru is the hill-station trail: arrival, waterfall, coffee, then back home. Mysore is the palace trail: arrival, Mysore Palace, zoo, then breakfast the next day.",
-      "The simplest rule is city order first: finish Chikkamagaluru before starting Mysore.",
-      "Full order: Chikkamagaluru — Arrival → Waterfall → Coffee → Back Home. Mysore — Arrival → Mysore Palace → Zoo → Authentic Breakfast (Next Day)."
+      "Chikkamagaluru starts with the waterfall, then the corn theft, then Z Point's wind. Mysore starts with Palace, Zoo, and Chamundi Hills.",
+      "Keep each city together: Chikkamagaluru ends with water sports, recovery shopping, and home; Mysore continues on day two with breakfast, Vrindavan Garden, and KRS Temple.",
+      "Full order: Chikkamagaluru — Waterfall → Corn Theft → Z Point → Scenic Photos → Lake → Water Sports → Recovery Shopping → Back Home. Mysore — Mysore Palace → Zoo → Chamundi Hills → Authentic South Indian Breakfast → Vrindavan Garden → KRS Temple."
     ],
     banter:[
-      "A hint for four stops? Even the capybara could place these without a map.",
-      "Two hints. No time loop, no red string, no Christopher Nolan — just two short trips.",
-      "Here is the short route. Arrival, highlights, home. The snacks approve."
+      "A hint already? The monkeys have better operational discipline than this.",
+      "Two hints. Z Point's wind stole fewer clues than you just requested.",
+      "Full route recovered. The corn is still missing, the shopping bag remains uncooperative, and the monkeys deny everything."
     ],
-    evidence:'EVIDENCE 15 — two ticket stubs, two cities, and a short itinerary written in the same handwriting.',
-    completion:"Maybe that's what all these cases were really about."
+    evidence:'EVIDENCE 15 — a soggy route map, a corn cob with suspicious bite marks, photographs from Z Point, and two ticket stubs from trips that were far too specific to be coincidence.',
+    completion:'Travel File Complete. Two itineraries restored, fourteen memories placed in order, and one corn theft remains unsolved.'
   },
   {
     id:'horror', num:'08', icon:'🕯️', label:'THE WALLPAPER BLINKED FIRST', gameType:'Emoji Nightmare Identification',
@@ -1929,7 +1929,7 @@ const completionWitByFile={
   anime:'The timeline has been reassembled. The red string is taking a well-earned emotional break.',
   sound:'The playlist is now legally a witness. It requests one encore and a snack.',
   wildlife:'The capybara remains cleared. The otters, however, are still refusing to comment.',
-  travel:'Both itineraries are accounted for. The snacks were, as always, the most reliable evidence.',
+  travel:'Fourteen memories recovered. The monkeys remain uncooperative, Z Point is still windy, and the shopping bag refuses to testify.',
   horror:'The nightmares have been identified. The wallpaper has been advised not to blink again.'
 };
 
@@ -3391,23 +3391,29 @@ function renderInterrogation(ch, area){
 function renderReorder(ch, area){
   const trips = [
     {
-      key:'chikka', name:'CHIKKAMAGALURU — SHORT TRAIL',
-      order:["Arrival","Waterfall","Coffee","Back Home"],
+      key:'chikka', name:'CHIKKAMAGALURU — THE MONKEY INCIDENT',
+      order:["Waterfall Reconnaissance","Corn Theft","Z Point Wind Trial","Scenic Evidence Shoot","Lake Surveillance","Water Sports Operation","Recovery Shopping Mission","Return Home"],
       flavorMap:{
-        "Arrival":"Wheels stop. Bags out. The trip officially begins.",
-        "Waterfall":"The first big stop: dramatic, loud, and worth the detour.",
-        "Coffee":"Chikkamagaluru is coffee country — this stop was never optional.",
-        "Back Home":"Trip one complete. The snacks survived the journey. Mostly."
+        "Waterfall Reconnaissance":"The investigation begins at the waterfall: dramatic, loud, and impossible to ignore.",
+        "Corn Theft":"Aggressive monkeys acquired the corn without consent, a receipt, or even a believable alibi.",
+        "Z Point Wind Trial":"Z Point's winds were so fast that several clues, hairstyles, and probably a little dignity were lost.",
+        "Scenic Evidence Shoot":"Photographs were taken at an extremely suspiciously beautiful location. The landscape has no alibi.",
+        "Lake Surveillance":"A beautiful lake appeared and briefly made everyone forget the monkey-related trauma.",
+        "Water Sports Operation":"Day two: water sports. The investigation became dramatically less dry.",
+        "Recovery Shopping Mission":"Alcohol and chocolates were secured as essential emotional evidence.",
+        "Return Home":"Chikkamagaluru reconstructed. The corn remains missing; the monkeys deny everything."
       }
     },
     {
-      key:'mysore', name:'MYSORE — SHORT TRAIL',
-      order:["Arrival","Mysore Palace","Zoo","Authentic Breakfast (Next Day)"],
+      key:'mysore', name:'MYSORE — THE ROYAL ALIBI',
+      order:["Mysore Palace Briefing","Zoo Witness Interviews","Chamundi Hills Ascent","Authentic South Indian Breakfast","Vrindavan Garden Patrol","KRS Temple Finale"],
       flavorMap:{
-        "Arrival":"Mysore, reporting for duty.",
-        "Mysore Palace":"The Palace: golden, enormous, and fully worth looking up for.",
-        "Zoo":"Mysore Zoo — wildlife research, with witnesses looking back.",
-        "Authentic Breakfast (Next Day)":"Day two starts right: an authentic local breakfast before heading home."
+        "Mysore Palace Briefing":"The royal evidence trail begins at Mysore Palace: golden, enormous, and worth looking up for.",
+        "Zoo Witness Interviews":"Mysore Zoo supplied several witnesses. None were as suspicious as the Chikkamagaluru monkeys.",
+        "Chamundi Hills Ascent":"Elevation gained. Detective stamina questioned.",
+        "Authentic South Indian Breakfast":"Day two begins with proper food and an unusually strong alibi.",
+        "Vrindavan Garden Patrol":"Gardens inspected for beauty, fountains, and any remaining loose clues.",
+        "KRS Temple Finale":"A temple surrounded by water closes the royal route with postcard-level evidence."
       }
     }
   ];
@@ -3473,7 +3479,9 @@ function renderReorder(ch, area){
       if(filled.every(f=>f)){
         const isCorrect = JSON.stringify(filled) === JSON.stringify(trip.order);
         if(isCorrect){
-          document.getElementById('chapterFeedback').textContent = `${trip.name} fully reconstructed. Every memory, in order.`;
+          document.getElementById('chapterFeedback').textContent = trip.key==='chikka'
+            ? 'CHIKKAMAGALURU RECONSTRUCTED. Eight stops recovered. The monkeys deny everything; the corn remains missing.'
+            : 'MYSORE RECONSTRUCTED. Palace, zoo, hills, breakfast, gardens, and the water-surrounded temple are all accounted for.';
           document.getElementById('chapterFeedback').className='feedbackLine good';
           document.getElementById('tripTab'+tripIndex).classList.remove('activeTab');
           document.getElementById('tripTab'+tripIndex).classList.add('doneTab');

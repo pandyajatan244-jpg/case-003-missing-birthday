@@ -896,6 +896,20 @@ input.caseInput::placeholder{ color:#69736d; }
 @media (prefers-reduced-motion:reduce){
   .motionFlash,.archiveCluePill.linked,.archiveBookPill.linked,.archiveSpineMessage span.recovered,.archiveSpineMessage.complete,.completionModal.show .completionModalCard{ animation:none; }
 }
+.soundControls{ position:fixed; top:54px; right:16px; z-index:75; display:flex; align-items:center; gap:7px; padding:6px 8px; border:1px solid rgba(191,178,139,.34); background:rgba(8,12,13,.88); box-shadow:3px 3px 0 rgba(0,0,0,.22); }
+.soundToggle{ padding:5px 7px; border:1px solid var(--line); background:transparent; color:var(--gold); cursor:pointer; font:700 .52rem/1 'Courier Prime',monospace; letter-spacing:.8px; }
+.soundToggle:hover{ border-color:var(--gold); background:rgba(215,184,102,.12); }
+.soundToggle.soundOn{ color:var(--green); border-color:var(--green); }
+.soundVolumeLabel{ color:var(--dim); font:700 .5rem/1 'Courier Prime',monospace; letter-spacing:1px; }
+.soundVolume{ width:72px; accent-color:var(--gold); cursor:pointer; }
+@media (max-width:600px){ .soundControls{ top:46px; right:10px; transform:scale(.9); transform-origin:top right; } }
+@media (prefers-reduced-motion:reduce){ .soundToggle:hover{ transform:none; } }
+.photoSlot{ aspect-ratio:3/4; min-height:210px; background:#0c1112; border:1px solid var(--line); box-shadow:5px 6px 0 rgba(0,0,0,.24); }
+.photoSlot img{ display:block; width:100%; height:100%; object-fit:cover; object-position:center; opacity:.96; transition:transform .35s ease,filter .35s ease; }
+.photoSlot:hover img{ transform:scale(1.035); filter:saturate(1.08) contrast(1.03); }
+.photoSlot .caption{ z-index:1; text-align:left; line-height:1.35; }
+@media (max-width:600px){ .montageGrid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .photoSlot{ min-height:180px; } }
+@media (prefers-reduced-motion:reduce){ .photoSlot img{ transition:none; } }
 </style>
 </head>
 <body>
@@ -904,6 +918,12 @@ input.caseInput::placeholder{ color:#69736d; }
 <div class="forensicHud" aria-hidden="true">
   <span class="hudCase">CASE 003</span><span class="hudDivider">/</span><span>MISSING BIRTHDAY</span>
   <span class="hudStatus">ACTIVE INVESTIGATION</span>
+</div>
+
+<div class="soundControls" aria-label="Sound controls">
+  <button class="soundToggle" id="soundToggle" type="button" aria-pressed="false" title="Turn sound on or off">🔇 SOUND OFF</button>
+  <label class="soundVolumeLabel" for="soundVolume">VOL</label>
+  <input id="soundVolume" class="soundVolume" type="range" min="0" max="100" value="38" aria-label="Sound volume">
 </div>
 
 <!-- ============ 1. INTRO ============ -->
@@ -1151,7 +1171,7 @@ input.caseInput::placeholder{ color:#69736d; }
   <div class="caseTitle">EVIDENCE — FINAL EXHIBITS</div>
   <h1 class="mainTitle">Photo Montage</h1>
   <p style="font-size:.78rem;color:var(--dim); max-width:480px; margin-bottom:20px;">
-    (Replace these slots in the code with real photos — see PERSONALIZATION at the top of the script.)
+    Recovered from the final evidence locker. Take your time with the exhibits.
   </p>
   <div class="montageGrid" id="montageGrid"></div>
   <button class="caseBtn" id="montageContinueBtn">ROLL CREDITS</button>
@@ -1248,6 +1268,100 @@ const gameState = {
   totalHintsUsed: 0, evidence: [], finalAccusation: null, chapterMechanics: {}, relationshipComplete:false,
   passcodeUnlocked:false, unlockedPasscodeDigits:{}, case004RevealSeen:false
 };
+
+/* ============================================================
+   SOUND DESK — lightweight Web Audio effects, no audio files required
+   ============================================================ */
+let soundEnabled=false;
+let soundVolume=0.38;
+let audioContext=null;
+let masterGain=null;
+let soundNoiseBuffer=null;
+
+function ensureAudio(){
+  if(!soundEnabled) return false;
+  try{
+    if(!audioContext){
+      const AudioCtx=window.AudioContext || window.webkitAudioContext;
+      if(!AudioCtx) return false;
+      audioContext=new AudioCtx();
+      masterGain=audioContext.createGain();
+      masterGain.gain.value=soundVolume;
+      masterGain.connect(audioContext.destination);
+    }
+    if(audioContext.state==='suspended') audioContext.resume();
+    return true;
+  }catch(e){ return false; }
+}
+function setSoundEnabled(enabled, playFeedback=true){
+  soundEnabled=Boolean(enabled);
+  const toggle=document.getElementById('soundToggle');
+  if(toggle){
+    toggle.textContent=soundEnabled?'🔊 SOUND ON':'🔇 SOUND OFF';
+    toggle.classList.toggle('soundOn',soundEnabled);
+    toggle.setAttribute('aria-pressed',String(soundEnabled));
+  }
+  if(soundEnabled && ensureAudio() && playFeedback) playSound('success');
+}
+function audioTone(startFreq,endFreq,duration,type='sine',level=.12,delay=0){
+  if(!ensureAudio()) return;
+  const now=audioContext.currentTime+delay;
+  const osc=audioContext.createOscillator();
+  const gain=audioContext.createGain();
+  osc.type=type; osc.frequency.setValueAtTime(startFreq,now);
+  if(endFreq!==startFreq) osc.frequency.exponentialRampToValueAtTime(Math.max(20,endFreq),now+duration);
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(Math.max(.0001,level),now+.012);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  osc.connect(gain); gain.connect(masterGain); osc.start(now); osc.stop(now+duration+.03);
+}
+function audioNoise(duration=.08,level=.07,delay=0){
+  if(!ensureAudio()) return;
+  const now=audioContext.currentTime+delay;
+  if(!soundNoiseBuffer){
+    soundNoiseBuffer=audioContext.createBuffer(1,audioContext.sampleRate*.5,audioContext.sampleRate);
+    const data=soundNoiseBuffer.getChannelData(0);
+    for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*.7;
+  }
+  const source=audioContext.createBufferSource();
+  const filter=audioContext.createBiquadFilter();
+  const gain=audioContext.createGain();
+  source.buffer=soundNoiseBuffer; filter.type='bandpass'; filter.frequency.value=1700; filter.Q.value=.7;
+  gain.gain.setValueAtTime(level,now); gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  source.connect(filter); filter.connect(gain); gain.connect(masterGain); source.start(now); source.stop(now+duration+.02);
+}
+function playSound(kind){
+  if(!soundEnabled || !ensureAudio()) return;
+  if(kind==='click'){ audioTone(240,150,.07,'triangle',.085); }
+  else if(kind==='select'){ audioTone(370,520,.09,'sine',.075); }
+  else if(kind==='type'){ audioNoise(.035,.035); audioTone(115,85,.035,'square',.025); }
+  else if(kind==='paper'){ audioNoise(.16,.045); audioTone(180,125,.14,'triangle',.035); }
+  else if(kind==='book'){ audioTone(115,80,.22,'sine',.09); audioNoise(.12,.035,.02); audioTone(310,420,.16,'triangle',.06,.12); }
+  else if(kind==='wrong'){ audioTone(180,75,.2,'sawtooth',.08); audioNoise(.09,.035); }
+  else if(kind==='success'){ audioTone(523,523,.16,'sine',.075); audioTone(659,659,.18,'sine',.075,.11); audioTone(784,784,.28,'sine',.09,.22); }
+  else if(kind==='lock'){ audioTone(170,82,.3,'square',.08); audioTone(420,760,.26,'triangle',.07,.22); }
+  else if(kind==='reveal'){ audioTone(196,196,.45,'sine',.055); audioTone(247,247,.45,'sine',.055,.08); audioTone(294,294,.6,'sine',.07,.16); audioTone(392,392,.8,'sine',.08,.28); }
+  else if(kind==='page'){ audioNoise(.08,.025); audioTone(150,105,.11,'triangle',.025); }
+}
+function bindSoundControls(){
+  const toggle=document.getElementById('soundToggle');
+  const volume=document.getElementById('soundVolume');
+  if(toggle) toggle.addEventListener('click',(event)=>{ event.stopPropagation(); setSoundEnabled(!soundEnabled); });
+  if(volume) volume.addEventListener('input',()=>{
+    soundVolume=Number(volume.value)/100;
+    if(masterGain) masterGain.gain.value=soundVolume;
+  });
+  document.addEventListener('pointerdown',(event)=>{
+    if(event.target.closest('#soundToggle,#soundVolume')) return;
+    const target=event.target.closest('button,.matchPill,.matchCard,.optionRow,.symbolBtn,.tripChip,.setlistSlot,.memoryChoice,.personCard,.chapterNode');
+    if(target && !target.disabled){
+      if(!soundEnabled) return;
+      ensureAudio();
+      playSound('click');
+    }
+  },{passive:true});
+}
+
 const INVESTIGATION_PROFILES = {
   observer: {
     id:'observer', name:'THE OBSERVER', icon:'🔍', strength:'Evidence scan', weakness:'Over-analysis',
@@ -1393,6 +1507,7 @@ function runDialogue(textEl, cueEl, lines, onComplete, speed=48){
     currentTimer = setInterval(()=>{
       textEl.textContent += line.charAt(i);
       i++;
+      if(i%4===0) playSound('type');
       if(i>=line.length){
         clearInterval(currentTimer);
         typing = false;
@@ -1469,6 +1584,7 @@ function showScreen(id){
   const screen=document.getElementById(id);
   screen.classList.remove('hidden');
   window.scrollTo(0,0);
+  playSound('page');
   requestAnimationFrame(()=>animateScreenEntrance(screen));
 }
 
@@ -2021,6 +2137,7 @@ function showCaseRevealIntro(){
   const button=document.getElementById('caseRevealBtn');
   modal.classList.add('show');
   document.body.classList.add('modalOpen');
+  playSound('reveal');
   button.onclick=()=>{
     gameState.case004RevealSeen=true;
     saveState();
@@ -2071,6 +2188,7 @@ function showCompletionModal(ch, resultNote, allFilesClosed){
 }
 
 function finishChapterSuccess(ch, resultNote){
+  playSound('success');
   const passcodeClue=passcodeClues[ch.id];
   if(!gameState.unlockedPasscodeDigits) gameState.unlockedPasscodeDigits={};
   if(passcodeClue) gameState.unlockedPasscodeDigits[ch.id]=passcodeClue.digit;
@@ -2283,11 +2401,13 @@ function verifyPasscode(){
   const feedback=document.getElementById('passcodeFeedback');
   const entered=passcodeDigits.join('');
   if(entered.length!==8){
+    playSound('wrong');
     feedback.textContent='The lock requires eight digits. The evidence locker has upgraded its security and its attitude.';
     feedback.className='relationshipFeedback bad';
     return;
   }
   if(entered===PASSCODE){
+    playSound('lock');
     if(passcodeTimerId) clearInterval(passcodeTimerId);
     passcodeTimerId=null;
     passcodeDeadline=0;
@@ -2299,6 +2419,7 @@ function verifyPasscode(){
     document.getElementById('submitPasscodeBtn').disabled=true;
     setTimeout(()=>openRelationshipCase(),1100);
   }else{
+    playSound('wrong');
     feedback.textContent='ACCESS DENIED — the sealed file has raised one eyebrow. Re-read the primary clue slips.';
     feedback.className='relationshipFeedback bad';
     resetPasscodeDigitsKeepingHints();
@@ -2786,6 +2907,7 @@ function renderSymbolSequence(ch, area){
         const spine=Array.from(message.children)[cases.indexOf(matched)];
         spine.textContent=matched.letter;
         spine.classList.add('recovered');
+        playSound('book');
         animateLibraryMatch(selectedClue, book, spine);
         linked++;
         selectedClue=null;
@@ -2801,6 +2923,7 @@ function renderSymbolSequence(ch, area){
       }else{
         if(consumeMistakeShield(ch)) return;
         book.classList.add('wrongPick');
+        playSound('wrong');
         document.getElementById('chapterFeedback').textContent='Wrong shelf. That book has a different kind of emotional damage attached to it.';
         document.getElementById('chapterFeedback').className='feedbackLine bad';
         setTimeout(()=>book.classList.remove('wrongPick'),380);
@@ -3792,21 +3915,38 @@ document.getElementById('letterContinueBtn').addEventListener('click', ()=>{
 
 function renderMontage(){
   const items = [
-    {label:'EVIDENCE 001', cap:'First meaningful photo'},
-    {label:'EVIDENCE 002', cap:'Funny memory'},
-    {label:'LOCATION CONFIRMED', cap:'Chikkamagaluru'},
-    {label:'LOCATION CONFIRMED', cap:'Mysore'},
-    {label:'MOTIVE CONFIRMED', cap:'Another memory'},
-    {label:'SUBJECT IDENTIFIED', cap:'Favorite photo of her'},
-    {label:'PARTNERS IDENTIFIED', cap:'Favorite photo together'},
-    {label:'CASE CLOSED', cap:'Final photo'}
+    {file:'arcade-1.jpg', label:'EVIDENCE 001', cap:'Arcade night'},
+    {file:'farewell-day-1.jpg', label:'EVIDENCE 002', cap:'Farewell day'},
+    {file:'farewell-day-2.jpg', label:'EVIDENCE 003', cap:'Farewell day — second exhibit'},
+    {file:'ghibli.jpg', label:'EVIDENCE 004', cap:'A Ghibli-style chapter'},
+    {file:'lego-1.jpg', label:'EVIDENCE 005', cap:'The LEGO evidence'},
+    {file:'lego-2.jpg', label:'EVIDENCE 006', cap:'The LEGO evidence — second exhibit'},
+    {file:'medalists-1.jpg', label:'EVIDENCE 007', cap:'Medalists'},
+    {file:'medalists-2.jpg', label:'EVIDENCE 008', cap:'Medalists — second exhibit'},
+    {file:'medalists-3.jpg', label:'EVIDENCE 009', cap:'Medalists — third exhibit'},
+    {file:'medalists-4.jpg', label:'EVIDENCE 010', cap:'Medalists — final exhibit'},
+    {file:'mysore-palace.jpg', label:'EVIDENCE 011', cap:'Mysore Palace'},
+    {file:'racha-1.jpg', label:'EVIDENCE 012', cap:'Racha — field memory one'},
+    {file:'racha-2.jpg', label:'EVIDENCE 013', cap:'Racha — field memory two'},
+    {file:'racha-3.jpg', label:'EVIDENCE 014', cap:'Racha — field memory three'},
+    {file:'racha-4.jpg', label:'EVIDENCE 015', cap:'Racha — field memory four'},
+    {file:'racha-5.jpg', label:'EVIDENCE 016', cap:'Racha — field memory five'},
+    {file:'the-trio-1.jpg', label:'EVIDENCE 017', cap:'The trio'},
+    {file:'the-trio-2.jpg', label:'EVIDENCE 018', cap:'The trio — second exhibit'},
+    {file:'the-trio-3.jpg', label:'EVIDENCE 019', cap:'The trio — final exhibit'},
+    {file:'us-1.jpg', label:'EVIDENCE 020', cap:'Us — first exhibit'},
+    {file:'us-2.jpg', label:'EVIDENCE 021', cap:'Us — second exhibit'},
+    {file:'us-3.jpg', label:'EVIDENCE 022', cap:'Us — third exhibit'},
+    {file:'us-4.jpg', label:'EVIDENCE 023', cap:'Us — fourth exhibit'},
+    {file:'us-5.jpg', label:'EVIDENCE 024', cap:'Us — fifth exhibit'},
+    {file:'us-6.jpg', label:'EVIDENCE 025', cap:'Us — final exhibit'}
   ];
   const grid = document.getElementById('montageGrid');
   grid.innerHTML='';
-  items.forEach(it=>{
+  items.forEach((it,index)=>{
     const slot = document.createElement('div');
     slot.className='photoSlot';
-    slot.innerHTML = `📷<div class="caption">${it.label}<br>${it.cap}</div>`;
+    slot.innerHTML = `<img src="photos/${it.file}" alt="${it.cap}" loading="${index < 4 ? 'eager' : 'lazy'}"><div class="caption">${it.label}<br>${it.cap}</div>`;
     grid.appendChild(slot);
   });
 }
@@ -3833,6 +3973,8 @@ document.getElementById('closeEasterEggBtn').addEventListener('click', (e)=>{
   e.stopPropagation();
   showScreen('screenCaseBoard');
 });
+
+bindSoundControls();
 </script>
 </body>
 </html>

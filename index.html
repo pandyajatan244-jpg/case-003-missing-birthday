@@ -1348,7 +1348,7 @@ const backgroundMusicFallbacks={
   relationship:['relationship.mp3'],
   birthday:['birthday.mp3']
 };
-function startBackgroundMusic(trackId, loop=true){
+function startBackgroundMusic(trackId){
   if(!soundEnabled) return;
   const primary=backgroundMusicTracks[trackId];
   if(!primary) return;
@@ -1359,7 +1359,7 @@ function startBackgroundMusic(trackId, loop=true){
     const source=sources[sourceIndex];
     if(!source) return;
     const audio=new Audio(source);
-    audio.loop=loop;
+    audio.loop=true;
     audio.preload='auto';
     audio.volume=Math.max(0,Math.min(1,soundVolume*backgroundMusicLevel));
     backgroundMusic=audio;
@@ -3322,21 +3322,20 @@ function renderMoodMatchingLegacy(ch, area){
 /* ---------- MINIGAME 5B: Audio Guess / Private Radio Intercept ---------- */
 function renderMoodMatching(ch, area){
   const clips=[
-  {song:'THUNDERSTRUCK', artist:'AC/DC', url:'audio/thunderstruck.mp3'},
-  {song:'WE FOUND LOVE', artist:'Rihanna', url:'audio/we-found-love.mp3'},
-  {song:'IDOL', artist:'BTS', url:'audio/idol.mp3'},
-  {song:'LOVE STORY', artist:'Taylor Swift', url:'audio/love-story.mp3'},
-  {song:'MOTH TO A FLAME', artist:'The Weeknd', url:'audio/moth-to-a-flame.mp3'},
-  {song:'SHAYAD', artist:'Arijit Singh', url:'audio/shayad.mp3'}
+  {song:'THUNDERSTRUCK', artist:'AC/DC', url:githubAudioBase+'thunderstruck.mp3'},
+  {song:'WE FOUND LOVE', artist:'Rihanna', url:githubAudioBase+'we-found-love.mp3'},
+  {song:'IDOL', artist:'BTS', url:githubAudioBase+'idol.mp3'},
+  {song:'LOVE STORY', artist:'Taylor Swift', url:githubAudioBase+'love-story.mp3'},
+  {song:'MOTH TO A FLAME', artist:'The Weeknd', url:githubAudioBase+'moth-to-a-flame.mp3'},
+  {song:'SHAYAD', artist:'Arijit Singh', url:githubAudioBase+'shayad.mp3'}
 ];
-  const CLIP_LIMIT_MS=15000;
   let currentIndex=0;
   let selectedSong='';
   let selectedArtist='';
   let roundLocked=false;
   let stopTimer=null;
   const audio=new Audio();
-  audio.preload='none';
+  audio.preload='auto';
 
   const panel=document.createElement('div');
   panel.className='audioGuessPanel';
@@ -3468,6 +3467,8 @@ function renderMoodMatching(ch, area){
     });
     songInput.value='';
     artistInput.value='';
+    songInput.disabled=false;
+    artistInput.disabled=false;
     selectedSong='';
     selectedArtist='';
     submitButton.disabled=true;
@@ -3488,9 +3489,7 @@ function renderMoodMatching(ch, area){
     audio.play().then(()=>{
       wave.classList.add('playing');
       playButton.textContent='❚❚ PAUSE CLIP';
-      status.textContent='Signal live — listen closely. Playback stops after 15 seconds.';
-      if(stopTimer) clearTimeout(stopTimer);
-      stopTimer=setTimeout(()=>stopAudio('Clip ended. You can replay it before submitting your guess.'),CLIP_LIMIT_MS);
+      status.textContent='Signal live — listen closely. Playback stops when the clip ends.';
     }).catch(()=>{
       wave.classList.remove('playing');
       playButton.textContent='↻ PLAY CLIP';

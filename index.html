@@ -380,13 +380,45 @@ body.modalOpen{ overflow:hidden; }
 .audioAnswerGrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .audioAnswerGroup{ min-width:0; }
 .audioAnswerLabel{ margin-bottom:7px; color:var(--gold); font:700 .56rem/1.2 'Courier Prime',monospace; letter-spacing:1.2px; }
-.audioChoiceList{ display:flex; flex-direction:column; gap:7px; }
-.audioChoice{ width:100%; min-height:40px; padding:9px 10px; border:1px solid var(--line); background:rgba(13,20,21,.88); color:var(--paperBright); text-align:left; cursor:pointer; font:700 .66rem/1.25 'Courier Prime',monospace; transition:transform .14s,border-color .14s,background .14s; }
-.audioChoice:hover{ transform:translateX(2px); border-color:var(--gold); background:rgba(48,55,49,.95); }
-.audioChoice.selected{ border-color:var(--gold); background:rgba(215,184,102,.18); color:var(--gold); }
-.audioChoice.correct{ border-color:var(--green); background:rgba(80,130,83,.2); color:var(--green); }
-.audioChoice.wrong{ border-color:var(--redBright); background:rgba(169,67,61,.22); color:#ffb1aa; }
-.audioChoice:disabled{ cursor:default; }
+.audioTextInput{
+  width:100%;
+  min-height:40px;
+  padding:10px;
+  border:1px solid var(--line);
+  background:rgba(13,20,21,.88);
+  color:var(--paperBright);
+  font:700 .7rem/1.25 'Courier Prime',monospace;
+  transition:border-color .14s,background .14s,box-shadow .14s;
+}
+
+.audioTextInput::placeholder{
+  color:var(--dim);
+  opacity:.85;
+}
+
+.audioTextInput:focus{
+  outline:none;
+  border-color:var(--gold);
+  background:rgba(48,55,49,.95);
+  box-shadow:0 0 0 2px rgba(215,184,102,.16);
+}
+
+.audioTextInput.correct{
+  border-color:var(--green);
+  background:rgba(80,130,83,.2);
+  color:var(--green);
+}
+
+.audioTextInput.wrong{
+  border-color:var(--redBright);
+  background:rgba(169,67,61,.22);
+  color:#ffb1aa;
+}
+
+.audioTextInput:disabled{
+  cursor:default;
+  opacity:.9;
+}
 .audioSubmitBtn{ display:block; width:100%; margin:15px 0 0; padding:11px 14px; border:1px solid var(--gold); background:transparent; color:var(--gold); cursor:pointer; font:700 .7rem/1 'Special Elite',monospace; letter-spacing:1.2px; transition:background .16s,color .16s,opacity .16s; }
 .audioSubmitBtn:hover:not(:disabled){ background:var(--gold); color:var(--coal); }
 .audioSubmitBtn:disabled{ opacity:.38; cursor:not-allowed; }
@@ -3115,34 +3147,46 @@ function renderMoodMatching(ch, area){
 
   const instructions=document.createElement('div');
   instructions.className='audioGuessInstructions';
-  instructions.textContent='Tap play, listen to the short clip, then select both the song and the artist. The next signal unlocks only after a correct guess.';
+  instructions.textContent='Tap play, listen to the short clip, then type both the song title and the artist name. The next signal unlocks only after a correct guess.';
   panel.appendChild(instructions);
 
   const answerGrid=document.createElement('div');
   answerGrid.className='audioAnswerGrid';
   panel.appendChild(answerGrid);
 
-  const songGroup=document.createElement('div');
-  songGroup.className='audioAnswerGroup';
-  const songLabel=document.createElement('div');
-  songLabel.className='audioAnswerLabel';
-  songLabel.textContent='SONG TITLE';
-  songGroup.appendChild(songLabel);
-  const songList=document.createElement('div');
-  songList.className='audioChoiceList';
-  songGroup.appendChild(songList);
-  answerGrid.appendChild(songGroup);
+const songGroup=document.createElement('div');
+songGroup.className='audioAnswerGroup';
 
-  const artistGroup=document.createElement('div');
-  artistGroup.className='audioAnswerGroup';
-  const artistLabel=document.createElement('div');
-  artistLabel.className='audioAnswerLabel';
-  artistLabel.textContent='ARTIST';
-  artistGroup.appendChild(artistLabel);
-  const artistList=document.createElement('div');
-  artistList.className='audioChoiceList';
-  artistGroup.appendChild(artistList);
-  answerGrid.appendChild(artistGroup);
+const songLabel=document.createElement('div');
+songLabel.className='audioAnswerLabel';
+songLabel.textContent='SONG TITLE';
+songGroup.appendChild(songLabel);
+
+const songList=document.createElement('input');
+songList.type='text';
+songList.className='audioTextInput';
+songList.placeholder='Type the song title...';
+songList.autocomplete='off';
+songList.setAttribute('aria-label','Song title');
+songGroup.appendChild(songList);
+answerGrid.appendChild(songGroup);
+
+const artistGroup=document.createElement('div');
+artistGroup.className='audioAnswerGroup';
+
+const artistLabel=document.createElement('div');
+artistLabel.className='audioAnswerLabel';
+artistLabel.textContent='ARTIST';
+artistGroup.appendChild(artistLabel);
+
+const artistList=document.createElement('input');
+artistList.type='text';
+artistList.className='audioTextInput';
+artistList.placeholder='Type the artist name...';
+artistList.autocomplete='off';
+artistList.setAttribute('aria-label','Artist name');
+artistGroup.appendChild(artistList);
+answerGrid.appendChild(artistGroup);
 
   const submitButton=document.createElement('button');
   submitButton.type='button';
@@ -3153,33 +3197,36 @@ function renderMoodMatching(ch, area){
 
   const feedback=document.getElementById('chapterFeedback');
 
-  function twentyBars(){ return 20; }
-  function shuffle(values){ return values.slice().sort(()=>Math.random()-.5); }
-  function stopAudio(message){
-    if(stopTimer) clearTimeout(stopTimer);
-    stopTimer=null;
-    audio.pause();
-    wave.classList.remove('playing');
-    playButton.textContent='↻ PLAY CLIP';
-    if(message) status.textContent=message;
-  }
-  function selectAnswer(kind,value,button){
-    if(roundLocked) return;
-    const list=kind==='song' ? songList : artistList;
-    list.querySelectorAll('.audioChoice').forEach(item=>item.classList.remove('selected'));
-    button.classList.add('selected');
-    if(kind==='song') selectedSong=value;
-    else selectedArtist=value;
-    submitButton.disabled=!(selectedSong && selectedArtist);
-  }
-  function createChoice(list,kind,value){
-    const button=document.createElement('button');
-    button.type='button';
-    button.className='audioChoice';
-    button.textContent=value;
-    button.addEventListener('click',()=>selectAnswer(kind,value,button));
-    list.appendChild(button);
-  }
+function twentyBars(){ return 20; }
+
+function normalizeAnswer(value){
+  return value.trim().replace(/\s+/g,' ').toUpperCase();
+}
+
+function stopAudio(message){
+  if(stopTimer) clearTimeout(stopTimer);
+  stopTimer=null;
+  audio.pause();
+  wave.classList.remove('playing');
+  playButton.textContent='↻ PLAY CLIP';
+  if(message) status.textContent=message;
+}
+
+function updateSubmitState(){
+  submitButton.disabled=!(selectedSong && selectedArtist);
+}
+
+songList.addEventListener('input',()=>{
+  if(roundLocked) return;
+  selectedSong=songList.value.trim();
+  updateSubmitState();
+});
+
+artistList.addEventListener('input',()=>{
+  if(roundLocked) return;
+  selectedArtist=artistList.value.trim();
+  updateSubmitState();
+});
   function loadRound(){
     if(currentIndex>=clips.length) return;
     roundLocked=false;
@@ -3197,11 +3244,13 @@ function renderMoodMatching(ch, area){
     progressDots.forEach((dot,i)=>{
       dot.className='audioProgressDot'+(i<currentIndex?' done':i===currentIndex?' active':'');
     });
-    songList.innerHTML='';
-    artistList.innerHTML='';
-    shuffle(clips.map(item=>item.song)).forEach(song=>createChoice(songList,'song',song));
-    shuffle(clips.map(item=>item.artist)).forEach(artist=>createChoice(artistList,'artist',artist));
-    submitButton.disabled=true;
+songList.value='';
+artistList.value='';
+songList.classList.remove('correct','wrong');
+artistList.classList.remove('correct','wrong');
+songList.disabled=false;
+artistList.disabled=false;
+submitButton.disabled=true;
     submitButton.textContent='SUBMIT GUESS';
     playButton.disabled=false;
     playButton.textContent='▶ PLAY CLIP';

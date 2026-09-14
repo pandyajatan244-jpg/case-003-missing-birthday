@@ -1298,10 +1298,12 @@ let soundNoiseBuffer=null;
 let activeClipAudio=null;
 let activeClipStop=null;
 function stopActiveClip(){
-  if(typeof activeClipStop==='function') activeClipStop();
-  else if(activeClipAudio){ try{ activeClipAudio.pause(); activeClipAudio.currentTime=0; }catch(e){} }
+  const audio=activeClipAudio;
+  const stop=activeClipStop;
   activeClipAudio=null;
   activeClipStop=null;
+  try{ if(typeof stop==='function') stop(); }catch(e){}
+  try{ if(audio){ audio.pause(); audio.currentTime=0; audio.removeAttribute('src'); audio.load(); } }catch(e){}
 }
 
 /* ---------- FILE-SPECIFIC MP3 MUSIC ---------- */
@@ -2366,7 +2368,10 @@ document.addEventListener('keydown', (event)=>{
   if(document.getElementById('caseRevealModal').classList.contains('show')) closeCaseRevealIntro();
 });
 
-document.getElementById('backToBoardBtn').addEventListener('click', ()=>{
+document.getElementById('backToBoardBtn').addEventListener('click', (event)=>{
+  event.preventDefault();
+  event.stopPropagation();
+  stopActiveClip();
   closeCompletionModal();
   renderCaseBoard();
   showScreen('screenCaseBoard');

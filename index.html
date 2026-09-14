@@ -390,35 +390,16 @@ body.modalOpen{ overflow:hidden; }
   font:700 .7rem/1.25 'Courier Prime',monospace;
   transition:border-color .14s,background .14s,box-shadow .14s;
 }
-
-.audioTextInput::placeholder{
-  color:var(--dim);
-  opacity:.85;
-}
-
+.audioTextInput::placeholder{ color:var(--dim); opacity:.85; }
 .audioTextInput:focus{
   outline:none;
   border-color:var(--gold);
   background:rgba(48,55,49,.95);
   box-shadow:0 0 0 2px rgba(215,184,102,.16);
 }
-
-.audioTextInput.correct{
-  border-color:var(--green);
-  background:rgba(80,130,83,.2);
-  color:var(--green);
-}
-
-.audioTextInput.wrong{
-  border-color:var(--redBright);
-  background:rgba(169,67,61,.22);
-  color:#ffb1aa;
-}
-
-.audioTextInput:disabled{
-  cursor:default;
-  opacity:.9;
-}
+.audioTextInput.correct{ border-color:var(--green); background:rgba(80,130,83,.2); color:var(--green); }
+.audioTextInput.wrong{ border-color:var(--redBright); background:rgba(169,67,61,.22); color:#ffb1aa; }
+.audioTextInput:disabled{ cursor:default; opacity:.9; }
 .audioSubmitBtn{ display:block; width:100%; margin:15px 0 0; padding:11px 14px; border:1px solid var(--gold); background:transparent; color:var(--gold); cursor:pointer; font:700 .7rem/1 'Special Elite',monospace; letter-spacing:1.2px; transition:background .16s,color .16s,opacity .16s; }
 .audioSubmitBtn:hover:not(:disabled){ background:var(--gold); color:var(--coal); }
 .audioSubmitBtn:disabled{ opacity:.38; cursor:not-allowed; }
@@ -3147,46 +3128,34 @@ function renderMoodMatching(ch, area){
 
   const instructions=document.createElement('div');
   instructions.className='audioGuessInstructions';
-  instructions.textContent='Tap play, listen to the short clip, then type both the song title and the artist name. The next signal unlocks only after a correct guess.';
+  instructions.textContent='Tap play, listen to the short clip, then select both the song and the artist. The next signal unlocks only after a correct guess.';
   panel.appendChild(instructions);
 
   const answerGrid=document.createElement('div');
   answerGrid.className='audioAnswerGrid';
   panel.appendChild(answerGrid);
 
-const songGroup=document.createElement('div');
-songGroup.className='audioAnswerGroup';
+  const songGroup=document.createElement('div');
+  songGroup.className='audioAnswerGroup';
+  const songLabel=document.createElement('div');
+  songLabel.className='audioAnswerLabel';
+  songLabel.textContent='SONG TITLE';
+  songGroup.appendChild(songLabel);
+  const songList=document.createElement('div');
+  songList.className='audioChoiceList';
+  songGroup.appendChild(songList);
+  answerGrid.appendChild(songGroup);
 
-const songLabel=document.createElement('div');
-songLabel.className='audioAnswerLabel';
-songLabel.textContent='SONG TITLE';
-songGroup.appendChild(songLabel);
-
-const songList=document.createElement('input');
-songList.type='text';
-songList.className='audioTextInput';
-songList.placeholder='Type the song title...';
-songList.autocomplete='off';
-songList.setAttribute('aria-label','Song title');
-songGroup.appendChild(songList);
-answerGrid.appendChild(songGroup);
-
-const artistGroup=document.createElement('div');
-artistGroup.className='audioAnswerGroup';
-
-const artistLabel=document.createElement('div');
-artistLabel.className='audioAnswerLabel';
-artistLabel.textContent='ARTIST';
-artistGroup.appendChild(artistLabel);
-
-const artistList=document.createElement('input');
-artistList.type='text';
-artistList.className='audioTextInput';
-artistList.placeholder='Type the artist name...';
-artistList.autocomplete='off';
-artistList.setAttribute('aria-label','Artist name');
-artistGroup.appendChild(artistList);
-answerGrid.appendChild(artistGroup);
+  const artistGroup=document.createElement('div');
+  artistGroup.className='audioAnswerGroup';
+  const artistLabel=document.createElement('div');
+  artistLabel.className='audioAnswerLabel';
+  artistLabel.textContent='ARTIST';
+  artistGroup.appendChild(artistLabel);
+  const artistList=document.createElement('div');
+  artistList.className='audioChoiceList';
+  artistGroup.appendChild(artistList);
+  answerGrid.appendChild(artistGroup);
 
   const submitButton=document.createElement('button');
   submitButton.type='button';
@@ -3197,38 +3166,32 @@ answerGrid.appendChild(artistGroup);
 
   const feedback=document.getElementById('chapterFeedback');
 
-function twentyBars(){ return 20; }
-
-function normalizeAnswer(value){
-  return value.trim().replace(/\s+/g,' ').toUpperCase();
-}
-
-function stopAudio(message){
-  if(stopTimer) clearTimeout(stopTimer);
-  stopTimer=null;
-  audio.pause();
-  wave.classList.remove('playing');
-  playButton.textContent='↻ PLAY CLIP';
-  if(message) status.textContent=message;
-}
-
-function updateSubmitState(){
-  submitButton.disabled=!(selectedSong && selectedArtist);
-}
-
-songList.addEventListener('input',()=>{
-  if(roundLocked) return;
-  selectedSong=songList.value.trim();
-  updateSubmitState();
-});
-
-artistList.addEventListener('input',()=>{
-  if(roundLocked) return;
-  selectedArtist=artistList.value.trim();
-  updateSubmitState();
-});
-  function normalizeAnswer(value){
-    return value.trim().replace(/\s+/g,' ').toUpperCase();
+  function twentyBars(){ return 20; }
+  function shuffle(values){ return values.slice().sort(()=>Math.random()-.5); }
+  function stopAudio(message){
+    if(stopTimer) clearTimeout(stopTimer);
+    stopTimer=null;
+    audio.pause();
+    wave.classList.remove('playing');
+    playButton.textContent='↻ PLAY CLIP';
+    if(message) status.textContent=message;
+  }
+  function selectAnswer(kind,value,button){
+    if(roundLocked) return;
+    const list=kind==='song' ? songList : artistList;
+    list.querySelectorAll('.audioChoice').forEach(item=>item.classList.remove('selected'));
+    button.classList.add('selected');
+    if(kind==='song') selectedSong=value;
+    else selectedArtist=value;
+    submitButton.disabled=!(selectedSong && selectedArtist);
+  }
+  function createChoice(list,kind,value){
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='audioChoice';
+    button.textContent=value;
+    button.addEventListener('click',()=>selectAnswer(kind,value,button));
+    list.appendChild(button);
   }
   function loadRound(){
     if(currentIndex>=clips.length) return;
@@ -3247,13 +3210,11 @@ artistList.addEventListener('input',()=>{
     progressDots.forEach((dot,i)=>{
       dot.className='audioProgressDot'+(i<currentIndex?' done':i===currentIndex?' active':'');
     });
-songList.value='';
-artistList.value='';
-songList.classList.remove('correct','wrong');
-artistList.classList.remove('correct','wrong');
-songList.disabled=false;
-artistList.disabled=false;
-submitButton.disabled=true;
+    songList.innerHTML='';
+    artistList.innerHTML='';
+    shuffle(clips.map(item=>item.song)).forEach(song=>createChoice(songList,'song',song));
+    shuffle(clips.map(item=>item.artist)).forEach(artist=>createChoice(artistList,'artist',artist));
+    submitButton.disabled=true;
     submitButton.textContent='SUBMIT GUESS';
     playButton.disabled=false;
     playButton.textContent='▶ PLAY CLIP';
@@ -3289,15 +3250,13 @@ submitButton.disabled=true;
   submitButton.addEventListener('click',()=>{
     if(roundLocked || !selectedSong || !selectedArtist) return;
     const clip=clips[currentIndex];
-    const songCorrect=normalizeAnswer(selectedSong)===normalizeAnswer(clip.song);
-    const artistCorrect=normalizeAnswer(selectedArtist)===normalizeAnswer(clip.artist);
+    const songCorrect=selectedSong===clip.song;
+    const artistCorrect=selectedArtist===clip.artist;
     if(songCorrect && artistCorrect){
       roundLocked=true;
       stopAudio();
-      songList.disabled=true;
-      artistList.disabled=true;
-      songList.classList.add('correct');
-      artistList.classList.add('correct');
+      songList.querySelectorAll('.audioChoice').forEach(button=>{ button.disabled=true; if(button.textContent===clip.song) button.classList.add('correct'); });
+      artistList.querySelectorAll('.audioChoice').forEach(button=>{ button.disabled=true; if(button.textContent===clip.artist) button.classList.add('correct'); });
       submitButton.disabled=true;
       feedback.textContent=`Correct — ${clip.song} by ${clip.artist}. The next signal is loading.`;
       feedback.className='feedbackLine good';
@@ -3312,17 +3271,8 @@ submitButton.disabled=true;
       feedback.textContent='Not quite. Recheck both selections — the signal is still waiting.';
       feedback.className='feedbackLine bad';
       submitButton.disabled=true;
-
-      songList.classList.toggle('wrong',!songCorrect);
-      artistList.classList.toggle('wrong',!artistCorrect);
-
-      setTimeout(()=>{
-        songList.classList.remove('wrong');
-        artistList.classList.remove('wrong');
-        songList.value='';
-        artistList.value='';
-      },650);
-
+      answerGrid.querySelectorAll('.audioChoice.selected').forEach(button=>button.classList.add('wrong'));
+      setTimeout(()=>answerGrid.querySelectorAll('.audioChoice').forEach(button=>button.classList.remove('selected','wrong')),650);
       selectedSong='';
       selectedArtist='';
     }

@@ -3291,8 +3291,10 @@ submitButton.disabled=true;
     if(songCorrect && artistCorrect){
       roundLocked=true;
       stopAudio();
-      songList.querySelectorAll('.audioChoice').forEach(button=>{ button.disabled=true; if(button.textContent===clip.song) button.classList.add('correct'); });
-      artistList.querySelectorAll('.audioChoice').forEach(button=>{ button.disabled=true; if(button.textContent===clip.artist) button.classList.add('correct'); });
+      songList.disabled=true;
+      artistList.disabled=true;
+      songList.classList.add('correct');
+      artistList.classList.add('correct');
       submitButton.disabled=true;
       feedback.textContent=`Correct — ${clip.song} by ${clip.artist}. The next signal is loading.`;
       feedback.className='feedbackLine good';
@@ -3307,8 +3309,17 @@ submitButton.disabled=true;
       feedback.textContent='Not quite. Recheck both selections — the signal is still waiting.';
       feedback.className='feedbackLine bad';
       submitButton.disabled=true;
-      answerGrid.querySelectorAll('.audioChoice.selected').forEach(button=>button.classList.add('wrong'));
-      setTimeout(()=>answerGrid.querySelectorAll('.audioChoice').forEach(button=>button.classList.remove('selected','wrong')),650);
+
+      songList.classList.toggle('wrong',!songCorrect);
+      artistList.classList.toggle('wrong',!artistCorrect);
+
+      setTimeout(()=>{
+        songList.classList.remove('wrong');
+        artistList.classList.remove('wrong');
+        songList.value='';
+        artistList.value='';
+      },650);
+
       selectedSong='';
       selectedArtist='';
     }

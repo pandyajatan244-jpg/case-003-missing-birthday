@@ -930,8 +930,8 @@ input.caseInput::placeholder{ color:#69736d; }
 </div>
 
 <div class="soundControls" aria-label="Sound controls">
-  <button class="soundToggle" id="soundToggle" type="button" aria-pressed="false" title="Turn sound on or off">🔇 SOUND OFF</button>
-  <span class="soundStatus" id="soundStatus" aria-live="polite">Click to enable</span>
+  <button class="soundToggle soundOn" id="soundToggle" type="button" aria-pressed="true" title="Turn sound on or off">🔊 SOUND ON</button>
+  <span class="soundStatus" id="soundStatus" aria-live="polite">Sound ready</span>
   <label class="soundVolumeLabel" for="soundVolume">VOL</label>
   <input id="soundVolume" class="soundVolume" type="range" min="0" max="100" value="38" aria-label="Sound volume">
 </div>
@@ -1289,7 +1289,7 @@ const gameState = {
 /* ============================================================
    SOUND DESK — lightweight Web Audio effects, no audio files required
    ============================================================ */
-let soundEnabled=false;
+let soundEnabled=true;
 let soundPreferenceSet=false;
 let soundVolume=0.38;
 let audioContext=null;
@@ -1331,7 +1331,7 @@ function stopBackgroundMusic(fadeMs=450){
 }
 const backgroundMusicFallbacks={
   cinema:['cinema.mp3'],
-  archive:['archive.mp3'],
+  archive:['acrhive.mp3'],
   television:['television.mp3'],
   anime:['anime.mp3'],
   wildlife:['wildlife.mp3'],

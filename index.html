@@ -3227,6 +3227,9 @@ artistList.addEventListener('input',()=>{
   selectedArtist=artistList.value.trim();
   updateSubmitState();
 });
+  function normalizeAnswer(value){
+    return value.trim().replace(/\s+/g,' ').toUpperCase();
+  }
   function loadRound(){
     if(currentIndex>=clips.length) return;
     roundLocked=false;
@@ -3286,8 +3289,8 @@ submitButton.disabled=true;
   submitButton.addEventListener('click',()=>{
     if(roundLocked || !selectedSong || !selectedArtist) return;
     const clip=clips[currentIndex];
-    const songCorrect=selectedSong===clip.song;
-    const artistCorrect=selectedArtist===clip.artist;
+    const songCorrect=normalizeAnswer(selectedSong)===normalizeAnswer(clip.song);
+    const artistCorrect=normalizeAnswer(selectedArtist)===normalizeAnswer(clip.artist);
     if(songCorrect && artistCorrect){
       roundLocked=true;
       stopAudio();

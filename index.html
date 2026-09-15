@@ -1382,7 +1382,7 @@ function syncBackgroundMusicForScreen(screenId){
   let trackId='';
   if(screenId==='screenChapter' && currentChapterIndex>=0 && chapters[currentChapterIndex]){
     trackId=chapters[currentChapterIndex].id;
-  }else if(screenId==='screenRelationshipCase' || screenId==='screenMontage'){
+  }else if(screenId==='screenRelationshipCase' || screenId==='screenMontage' || screenId==='screenCredits'){
     trackId='relationship';
   }
   if(trackId) startBackgroundMusic(trackId); else stopBackgroundMusic();

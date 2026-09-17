@@ -1506,7 +1506,7 @@ const observerScanText = {
   horror:'EVIDENCE SCAN: The strangest emoji is usually the decisive clue. Spirals, showers, trains, red doubles, balloons, and haunted houses each point toward a very specific nightmare.'
 };
 const analystOverlayText = {
-  cinema:'PATTERN OVERLAY: There are 14 prop–film pairs arranged across three reels. A successful pair disappears from the active search.',
+  cinema:'PATTERN OVERLAY: There are 15 prop–film pairs arranged across three reels. A successful pair disappears from the active search.',
   archive:'PATTERN OVERLAY: There are eight one-to-one evidence matches. A correct book-and-clue pairing restores one letter to the library spine message.',
   television:'PATTERN OVERLAY: Eight channels must be cleared in order. One correct phrase unlocks exactly one next channel.',
   anime:'PATTERN OVERLAY: Complete the dialogue file and the terrible-summary file. The jigsaw stage has been removed.',
@@ -1797,11 +1797,11 @@ const chapters = [
     id:'cinema', num:'01', icon:'🎬', label:'THE POPCORN CRIME SCENE', gameType:'Memory Match',
     eyebrow:'THE POPCORN CRIME SCENE — EVIDENCE SHELF',
     title:'Match each prop to its film',
-    flavor:'Flip two cards at a time. Six films, six props, one increasingly unhinged evidence shelf.',
+    flavor:'Flip two cards at a time. Fifteen films, fifteen props, one increasingly unhinged evidence shelf.',
     hints:[
       "Somewhere in this grid, a katana and a very specific revenge story belong together. \"Bill... I want you to know something...\"",
-      "Look for pairs: prop and film. The full cinema reel includes Kill Bill, Inglourious Basterds, The Dark Knight, The Sixth Sense, Se7en, Jurassic Park, Harry Potter, Interstellar, The Hunger Games, Zindagi Na Milegi Dobara, Andaz Apna Apna, Yeh Jawaani Hai Deewani, Jab We Met, and The Matrix.",
-      "The first reel includes Katana↔Kill Bill, Film Reel↔Inglourious Basterds, Bat Emblem↔The Dark Knight, Red Door↔The Sixth Sense, Numbered Box↔Se7en, Amber Mosquito↔Jurassic Park, Wand↔Harry Potter, Watch↔Interstellar, Mockingjay Pin↔The Hunger Games, Road Map↔Zindagi Na Milegi Dobara, Yellow Suitcase↔Andaz Apna Apna, Train Ticket↔Yeh Jawaani Hai Deewani, Red Scarf↔Jab We Met, and Red Pill↔The Matrix."
+      "Look for pairs: prop and film. The full cinema reel includes Kill Bill, Inglourious Basterds, The Dark Knight, The Sixth Sense, Se7en, Jurassic Park, Harry Potter, Interstellar, The Hunger Games, Zindagi Na Milegi Dobara, Andaz Apna Apna, Yeh Jawaani Hai Deewani, Jab We Met, The Matrix, and Dhurandhar.",
+      "The evidence shelf includes Katana↔Kill Bill, Film Reel↔Inglourious Basterds, Bat Emblem↔The Dark Knight, Red Door↔The Sixth Sense, Numbered Box↔Se7en, Amber Mosquito↔Jurassic Park, Wand↔Harry Potter, Watch↔Interstellar, Mockingjay Pin↔The Hunger Games, Road Map↔Zindagi Na Milegi Dobara, Yellow Suitcase↔Andaz Apna Apna, Train Ticket↔Yeh Jawaani Hai Deewani, Red Scarf↔Jab We Met, Red Pill↔The Matrix, and a coded field dossier↔Dhurandhar."
     ],
     banter:[
       "Oh, hint already? The Bride took on the entire Crazy 88 with less help than this.",
@@ -2892,7 +2892,7 @@ function renderHorrorEmojiQuiz(ch, area){
 function renderMemoryMatch(ch, area){
   const films = [
     ["Katana wrapped in cloth","KILL BILL","The Bride has entered the evidence shelf."],
-    ["Vintage film reel and radio","INGLOURIOUS BASTERDS","A covert cinema operation, a Nazi-hunting mission, and one very dramatic radio broadcast."],
+    ["Vintage film reel and cinema marquee","INGLOURIOUS BASTERDS","A Nazi-hunting squad, a French cinema, and a final act that turns the screen itself into the weapon."],
     ["Scorched bat emblem","THE DARK KNIGHT","Why so serious? The match is correct."],
     ["Red door and pale aura","THE SIXTH SENSE","The clue sees film references. Sometimes."],
     ["Seven numbered evidence cards","SE7EN","What is in the box? Correctly matched evidence."],
@@ -2904,7 +2904,8 @@ function renderMemoryMatch(ch, area){
     ["Yellow suitcase and chaotic plan","ANDAZ APNA APNA","Amar and Prem, a ridiculous treasure hunt, and enough chaos to make the suitcase suspicious."],
     ["Train ticket and mountain postcard","YE JAWANI HAI DEEWANI","The evidence is ready for a travel montage."],
     ["Red scarf and runaway bus ticket","JAB WE MET","Geet energy detected. The clue has opinions."],
-    ["Red pill and blue pill","THE MATRIX","There is no spoon. There is, however, a correct match."]
+    ["Red pill and blue pill","THE MATRIX","There is no spoon. There is, however, a correct match."],
+    ["Coded field dossier and shadow map","DHURANDHAR","A hard-edged espionage file: covert operations, shifting loyalties, and a mission that belongs in the darkest corner of the evidence room."]
   ];
   const rounds = [films.slice(0,5), films.slice(5,10), films.slice(10)];
   let roundIndex = 0;
@@ -2945,7 +2946,7 @@ function renderMemoryMatch(ch, area){
                   document.getElementById('chapterFeedback').textContent='Reel cleared. The projectionist loads the next set of memories.';
                   setTimeout(()=>{ grid.remove(); renderRound(); },850);
                 }else{
-                  document.getElementById('chapterFeedback').textContent='All fourteen films cross-referenced. The cinema file is gloriously overqualified.';
+                  document.getElementById('chapterFeedback').textContent='All fifteen films cross-referenced. The cinema file is gloriously overqualified.';
                   finishChapterSuccess(ch);
                 }
               }
